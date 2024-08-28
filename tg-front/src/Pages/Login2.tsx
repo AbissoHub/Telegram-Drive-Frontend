@@ -33,8 +33,7 @@ import MenuItem from '@mui/joy/MenuItem';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded';
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
@@ -55,7 +54,8 @@ export default function FilesExample() {
           <Navigation />
         </Layout.SideDrawer>
       )}
-      <Stack
+
+        <Stack
         id="tab-bar"
         direction="row"
         spacing={1}
@@ -72,29 +72,9 @@ export default function FilesExample() {
           borderColor: 'divider',
         }}
       >
-        <Button
-          variant="plain"
-          color="neutral"
-          component="a"
-          href="/joy-ui/getting-started/templates/email/"
-          size="sm"
-          startDecorator={<EmailRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Email
-        </Button>
-        <Button
-          variant="plain"
-          color="neutral"
-          component="a"
-          href="/joy-ui/getting-started/templates/team/"
-          size="sm"
-          startDecorator={<PeopleAltRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Team
-        </Button>
-        <Button
+
+
+          <Button
           variant="plain"
           color="neutral"
           aria-pressed="true"
@@ -103,9 +83,12 @@ export default function FilesExample() {
           size="sm"
           startDecorator={<FolderRoundedIcon />}
           sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Files
-        </Button>
+
+          >
+
+              Files
+
+          </Button>
       </Stack>
       <Layout.Root
         sx={[

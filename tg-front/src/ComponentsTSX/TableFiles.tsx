@@ -20,7 +20,7 @@ export default function TableFiles() {
         <thead>
           <tr>
             <th>
-              <Typography level="title-sm">Folder</Typography>
+              <Typography level="title-sm">Name</Typography>
             </th>
             <th>
               <Typography
@@ -34,7 +34,7 @@ export default function TableFiles() {
               <Typography level="title-sm">Size</Typography>
             </th>
             <th>
-              <Typography level="title-sm">Users</Typography>
+              <Typography level="title-sm">Owner</Typography>
             </th>
           </tr>
         </thead>
