@@ -5,6 +5,8 @@ import Typography from '@mui/joy/Typography';
 import Table from '@mui/joy/Table';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
+import VideoFileIcon from '@mui/icons-material/VideoFile';
+
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 
 export default function TableFiles() {
@@ -181,6 +183,33 @@ export default function TableFiles() {
               />
             </td>
           </tr>
+
+          <tr>
+            <td>
+              <Typography
+                  level="title-sm"
+                  startDecorator={<VideoFileIcon color="secondary" />}
+                  sx={{ alignItems: 'flex-start' }}
+              >
+                VideoLaureaExample
+              </Typography>
+            </td>
+            <td>
+              <Typography level="body-sm">14 Mar 2021, 7PM</Typography>
+            </td>
+            <td>
+              <Typography level="body-sm">123.3KB</Typography>
+            </td>
+            <td>
+              <Avatar
+                  size="sm"
+                  src="https://i.pravatar.cc/24?img=2"
+                  srcSet="https://i.pravatar.cc/48?img=2 2x"
+                  sx={{ '--Avatar-size': '24px' }}
+              />
+            </td>
+          </tr>
+
         </tbody>
       </Table>
     </div>
