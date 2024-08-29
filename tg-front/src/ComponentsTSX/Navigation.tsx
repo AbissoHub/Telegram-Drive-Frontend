@@ -105,21 +105,7 @@ export default function Navigation() {
               <ListItemContent>Travels</ListItemContent>
             </ListItemButton>
           </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <Box
-                  sx={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '99px',
-                    bgcolor: 'success.400',
-                  }}
-                />
-              </ListItemDecorator>
-              <ListItemContent>Concert tickets</ListItemContent>
-            </ListItemButton>
-          </ListItem>
+
         </List>
       </ListItem>
     </List>
