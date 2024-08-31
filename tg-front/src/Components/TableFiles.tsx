@@ -14,7 +14,9 @@ import ModalDialog from '@mui/joy/ModalDialog';
 import DialogTitle from '@mui/joy/DialogTitle';
 import DialogContent from '@mui/joy/DialogContent';
 import Stack from '@mui/joy/Stack';
-
+import FolderIcon from '@mui/icons-material/Folder';
+import Breadcrumbs from '@mui/joy/Breadcrumbs';
+import Link from '@mui/joy/Link';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
@@ -22,61 +24,71 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 
-export default function TableFiles({ onFileClick }) {
-  const [files, setFiles] = React.useState([
-    // Array dei file
-    {
-      name: 'Travel pictures',
-      type: 'folder',
-      modified: '21 Oct 2023, 3PM',
-      size: '987.5MB',
-      owner: [
-        { avatar: 'https://i.pravatar.cc/24?img=6' },
-        { avatar: 'https://i.pravatar.cc/24?img=7' },
-        { avatar: 'https://i.pravatar.cc/24?img=8' },
-        { avatar: 'https://i.pravatar.cc/24?img=9' },
-      ],
+export default function FileManager({ onFileClick }) {
+  // Struttura del "file system"
+  const fileSystem = {
+    MyFiles: {
+      'Travel pictures': {
+        type: 'folder',
+        modified: '21 Oct 2023, 3PM',
+        size: '987.5MB',
+        owner: [
+          { avatar: 'https://i.pravatar.cc/24?img=6' },
+          { avatar: 'https://i.pravatar.cc/24?img=7' },
+          { avatar: 'https://i.pravatar.cc/24?img=8' },
+          { avatar: 'https://i.pravatar.cc/24?img=9' },
+        ],
+        contents: {
+          'Summer Trip': {
+            type: 'file',
+            modified: '22 Oct 2023, 10AM',
+            size: '2.3GB',
+            owner: [{ avatar: 'https://i.pravatar.cc/24?img=5' }],
+          },
+        },
+      },
+      'Important documents': {
+        type: 'folder',
+        modified: '26 Sep 2023, 7PM',
+        size: '232.3MB',
+        owner: [
+          { avatar: 'https://i.pravatar.cc/24?img=1' },
+          { avatar: 'https://i.pravatar.cc/24?img=9' },
+          { avatar: 'https://i.pravatar.cc/24?img=2' },
+          { avatar: 'https://i.pravatar.cc/24?img=3' },
+          { additional: 3 },
+        ],
+        contents: {},
+      },
+      Projects: {
+        type: 'folder',
+        modified: '12 Aug 2021, 7PM',
+        size: '1.6GB',
+        owner: [
+          { avatar: 'https://i.pravatar.cc/24?img=4' },
+          { avatar: 'https://i.pravatar.cc/24?img=8' },
+          { avatar: 'https://i.pravatar.cc/24?img=5' },
+        ],
+        contents: {},
+      },
+      Invoices: {
+        type: 'folder',
+        modified: '14 Mar 2021, 7PM',
+        size: '123.3KB',
+        owner: [{ avatar: 'https://i.pravatar.cc/24?img=2' }],
+        contents: {},
+      },
+      VideoLaureaExample: {
+        type: 'file',
+        modified: '14 Mar 2021, 7PM',
+        size: '123.3KB',
+        owner: [{ avatar: 'https://i.pravatar.cc/24?img=2' }],
+      },
     },
-    {
-      name: 'Important documents',
-      type: 'folder',
-      modified: '26 Sep 2023, 7PM',
-      size: '232.3MB',
-      owner: [
-        { avatar: 'https://i.pravatar.cc/24?img=1' },
-        { avatar: 'https://i.pravatar.cc/24?img=9' },
-        { avatar: 'https://i.pravatar.cc/24?img=2' },
-        { avatar: 'https://i.pravatar.cc/24?img=3' },
-        { additional: 3 },
-      ],
-    },
-    {
-      name: 'Projects',
-      type: 'folder',
-      modified: '12 Aug 2021, 7PM',
-      size: '1.6GB',
-      owner: [
-        { avatar: 'https://i.pravatar.cc/24?img=4' },
-        { avatar: 'https://i.pravatar.cc/24?img=8' },
-        { avatar: 'https://i.pravatar.cc/24?img=5' },
-      ],
-    },
-    {
-      name: 'Invoices',
-      type: 'folder',
-      modified: '14 Mar 2021, 7PM',
-      size: '123.3KB',
-      owner: [{ avatar: 'https://i.pravatar.cc/24?img=2' }],
-    },
-    {
-      name: 'VideoLaureaExample',
-      type: 'file',
-      modified: '14 Mar 2021, 7PM',
-      size: '123.3KB',
-      owner: [{ avatar: 'https://i.pravatar.cc/24?img=2' }],
-    },
-  ]);
+  };
 
+  const [currentPath, setCurrentPath] = React.useState(['MyFiles']);
+  const [files, setFiles] = React.useState(Object.entries(fileSystem['MyFiles']));
   const [open, setOpen] = React.useState(false);
   const [modalType, setModalType] = React.useState('');
   const [selectedFile, setSelectedFile] = React.useState(null);
@@ -96,23 +108,65 @@ export default function TableFiles({ onFileClick }) {
   };
 
   const handleRename = () => {
-    setFiles((prevFiles) =>
-        prevFiles.map((file) =>
-            file.name === selectedFile.name ? { ...file, name: newName } : file
-        )
-    );
+    // Logica per rinominare un file
     handleCloseModal();
   };
 
   const handleDelete = () => {
-    setFiles((prevFiles) =>
-        prevFiles.filter((file) => file.name !== selectedFile.name)
-    );
+    // Logica per eliminare un file
     handleCloseModal();
+  };
+
+  const handleFolderClick = (folderName) => {
+    const newPath = [...currentPath, folderName];
+    setCurrentPath(newPath);
+
+    // Naviga nella struttura dei file in base al percorso corrente
+    let currentFolder = fileSystem;
+    for (const folder of newPath) {
+      currentFolder = currentFolder[folder]?.contents || {};
+    }
+
+    setFiles(Object.entries(currentFolder));
+  };
+
+  const handleBreadcrumbClick = (index) => {
+    const newPath = currentPath.slice(0, index + 1);
+    setCurrentPath(newPath);
+
+    // Se si torna a "MyFiles", visualizza il contenuto di "MyFiles"
+    if (newPath.length === 1 && newPath[0] === 'MyFiles') {
+      setFiles(Object.entries(fileSystem['MyFiles']));
+      return;
+    }
+
+    // Naviga nella struttura dei file in base al percorso aggiornato
+    let currentFolder = fileSystem;
+    for (const folder of newPath) {
+      currentFolder = currentFolder[folder]?.contents || {};
+    }
+
+    setFiles(Object.entries(currentFolder));
   };
 
   return (
       <div>
+        {/* Breadcrumbs dinamici */}
+        <Breadcrumbs separator="›" aria-label="breadcrumbs" sx={{ mb: 2 }}>
+          {currentPath.map((item, index) => (
+              <Link
+                  key={item}
+                  color="primary"
+                  onClick={() => handleBreadcrumbClick(index)}
+                  sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                <FolderIcon sx={{ mr: 0.5 }} color="inherit" />
+                {item}
+              </Link>
+          ))}
+        </Breadcrumbs>
+
+        {/* Tabella dei file */}
         <Table
             hoverRow
             size="sm"
@@ -155,7 +209,7 @@ export default function TableFiles({ onFileClick }) {
           </tr>
           </thead>
           <tbody>
-          {files.map((file, index) => (
+          {files.map(([name, file], index) => (
               <tr
                   key={index}
                   onClick={() => file.type === 'file' && onFileClick(file)}
@@ -172,8 +226,9 @@ export default function TableFiles({ onFileClick }) {
                         )
                       }
                       sx={{ alignItems: 'flex-start' }}
+                      onClick={() => file.type === 'folder' && handleFolderClick(name)}
                   >
-                    {file.name}
+                    {name}
                   </Typography>
                 </td>
                 <td>
@@ -205,7 +260,7 @@ export default function TableFiles({ onFileClick }) {
                         size="sm"
                         aria-label="Rename"
                         onClick={(event) => {
-                          event.stopPropagation(); // Impedisce la propagazione del clic
+                          event.stopPropagation();
                           handleOpenModal('rename', file);
                         }}
                     >
@@ -218,7 +273,7 @@ export default function TableFiles({ onFileClick }) {
                         size="sm"
                         aria-label="Delete"
                         onClick={(event) => {
-                          event.stopPropagation(); // Impedisce la propagazione del clic
+                          event.stopPropagation();
                           handleOpenModal('delete', file);
                         }}
                     >
@@ -231,6 +286,7 @@ export default function TableFiles({ onFileClick }) {
           </tbody>
         </Table>
 
+        {/* Modal per rinominare o cancellare file */}
         <Modal open={open} onClose={handleCloseModal}>
           <ModalDialog>
             {modalType === 'rename' && (
