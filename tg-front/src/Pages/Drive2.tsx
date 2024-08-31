@@ -8,11 +8,11 @@ import Stack from '@mui/joy/Stack';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
-import Layout from '../ComponentsTSX/Layout.tsx';
-import Navigation from '../ComponentsTSX/Navigation.tsx';
-import Header from '../ComponentsTSX/Header.tsx';
-import TableFiles from '../ComponentsTSX/TableFiles.tsx';
-import FileDetails from '../ComponentsTSX/FileDetails.tsx';
+import Layout from '../Components/Layout.tsx';
+import Navigation from '../Components/Navigation.tsx';
+import Header from '../Components/Header.tsx';
+import TableFiles from '../Components/TableFiles.tsx';
+import FileDetails from '../Components/FileDetails.tsx';
 
 export default function FilesExample() {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
