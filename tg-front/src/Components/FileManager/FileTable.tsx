@@ -91,9 +91,12 @@ export default function FileTable({
                     </td>
                     <td>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                            <IconButton variant="plain" color="neutral" size="sm" aria-label="Download">
-                                <DownloadRoundedIcon />
-                            </IconButton>
+                            {/* Show download icon only for files */}
+                            {file.type === 'file' && (
+                                <IconButton variant="plain" color="neutral" size="sm" aria-label="Download">
+                                    <DownloadRoundedIcon />
+                                </IconButton>
+                            )}
                             <IconButton
                                 variant="plain"
                                 color="neutral"

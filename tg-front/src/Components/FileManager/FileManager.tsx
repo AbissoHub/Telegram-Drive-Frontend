@@ -158,48 +158,190 @@ export default function FileManager({ onFileClick }) {
         status: 'success',
         message: 'Get all files successfully',
         data: [
+            // Root level files
             {
-                id_message: '13528',
-                media_name: 'sample.pdf',
-                locate_media: './test/upload',
-                media_size: 0.02,
-                media_type: 'application/pdf',
-                message_text: 'sample.pdf@./test/upload',
-                date: '2024-07-27T09:40:54',
-                is_folder: false,
-            },
-            {
-                id_message: '13410',
-                media_name: 'ano1.jpg',
+                id_message: '20001',
+                media_name: 'rootFile1.txt',
                 locate_media: './',
-                media_size: 0.03,
-                media_type: 'image/jpeg',
-                message_text: 'ano1.jpg@./@all',
-                date: '2024-07-18T20:01:52',
+                media_size: 0.5,
+                media_type: 'text/plain',
+                message_text: 'rootFile1.txt@./',
+                date: '2024-09-14T10:00:00',
                 is_folder: false,
             },
             {
-                id_message: -1,
-                media_name: 'None',
-                locate_media: './test/upload',
-                media_size: 0,
-                media_type: 'None',
-                message_text: 'None',
-                date: '2024-09-12T17:36:45',
-                is_folder: true,
+                id_message: '20002',
+                media_name: 'rootFile2.docx',
+                locate_media: './',
+                media_size: 1.2,
+                media_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                message_text: 'rootFile2.docx@./',
+                date: '2024-09-14T11:00:00',
+                is_folder: false,
             },
+            // First-level folder
             {
                 id_message: -1,
                 media_name: 'None',
-                locate_media: './aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                locate_media: './Documents',
                 media_size: 0,
                 media_type: 'None',
                 message_text: 'None',
-                date: '2024-09-12T17:38:43',
+                date: '2024-09-14T09:00:00',
                 is_folder: true,
+            },
+            // Files in Documents folder
+            {
+                id_message: '20003',
+                media_name: 'resume.pdf',
+                locate_media: './Documents',
+                media_size: 0.8,
+                media_type: 'application/pdf',
+                message_text: 'resume.pdf@./Documents',
+                date: '2024-09-13T14:00:00',
+                is_folder: false,
+            },
+            {
+                id_message: '20004',
+                media_name: 'cover_letter.pdf',
+                locate_media: './Documents',
+                media_size: 0.6,
+                media_type: 'application/pdf',
+                message_text: 'cover_letter.pdf@./Documents',
+                date: '2024-09-13T15:00:00',
+                is_folder: false,
+            },
+            // Second-level folder inside Documents
+            {
+                id_message: -1,
+                media_name: 'None',
+                locate_media: './Documents/Work',
+                media_size: 0,
+                media_type: 'None',
+                message_text: 'None',
+                date: '2024-09-13T12:00:00',
+                is_folder: true,
+            },
+            // Files in Documents/Work folder
+            {
+                id_message: '20005',
+                media_name: 'project_plan.xlsx',
+                locate_media: './Documents/Work',
+                media_size: 2.5,
+                media_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                message_text: 'project_plan.xlsx@./Documents/Work',
+                date: '2024-09-12T10:30:00',
+                is_folder: false,
+            },
+            {
+                id_message: '20006',
+                media_name: 'budget.xlsx',
+                locate_media: './Documents/Work',
+                media_size: 1.9,
+                media_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                message_text: 'budget.xlsx@./Documents/Work',
+                date: '2024-09-12T11:00:00',
+                is_folder: false,
+            },
+            // Third-level folder inside Documents/Work
+            {
+                id_message: -1,
+                media_name: 'None',
+                locate_media: './Documents/Work/Reports',
+                media_size: 0,
+                media_type: 'None',
+                message_text: 'None',
+                date: '2024-09-11T09:00:00',
+                is_folder: true,
+            },
+            // Files in Documents/Work/Reports folder
+            {
+                id_message: '20007',
+                media_name: 'report1.pdf',
+                locate_media: './Documents/Work/Reports',
+                media_size: 0.7,
+                media_type: 'application/pdf',
+                message_text: 'report1.pdf@./Documents/Work/Reports',
+                date: '2024-09-10T16:00:00',
+                is_folder: false,
+            },
+            {
+                id_message: '20008',
+                media_name: 'report2.pdf',
+                locate_media: './Documents/Work/Reports',
+                media_size: 0.9,
+                media_type: 'application/pdf',
+                message_text: 'report2.pdf@./Documents/Work/Reports',
+                date: '2024-09-10T17:00:00',
+                is_folder: false,
+            },
+            // Another first-level folder
+            {
+                id_message: -1,
+                media_name: 'None',
+                locate_media: './Pictures',
+                media_size: 0,
+                media_type: 'None',
+                message_text: 'None',
+                date: '2024-09-14T08:00:00',
+                is_folder: true,
+            },
+            // Files in Pictures folder
+            {
+                id_message: '20009',
+                media_name: 'vacation_photo1.jpg',
+                locate_media: './Pictures',
+                media_size: 3.2,
+                media_type: 'image/jpeg',
+                message_text: 'vacation_photo1.jpg@./Pictures',
+                date: '2024-09-01T10:00:00',
+                is_folder: false,
+            },
+            {
+                id_message: '20010',
+                media_name: 'vacation_photo2.jpg',
+                locate_media: './Pictures',
+                media_size: 2.8,
+                media_type: 'image/jpeg',
+                message_text: 'vacation_photo2.jpg@./Pictures',
+                date: '2024-09-01T11:00:00',
+                is_folder: false,
+            },
+            // Second-level folder inside Pictures
+            {
+                id_message: -1,
+                media_name: 'None',
+                locate_media: './Pictures/Family',
+                media_size: 0,
+                media_type: 'None',
+                message_text: 'None',
+                date: '2024-09-05T09:00:00',
+                is_folder: true,
+            },
+            // Files in Pictures/Family folder
+            {
+                id_message: '20011',
+                media_name: 'family_photo1.jpg',
+                locate_media: './Pictures/Family',
+                media_size: 2.5,
+                media_type: 'image/jpeg',
+                message_text: 'family_photo1.jpg@./Pictures/Family',
+                date: '2024-09-05T10:00:00',
+                is_folder: false,
+            },
+            {
+                id_message: '20012',
+                media_name: 'family_photo2.jpg',
+                locate_media: './Pictures/Family',
+                media_size: 2.6,
+                media_type: 'image/jpeg',
+                message_text: 'family_photo2.jpg@./Pictures/Family',
+                date: '2024-09-05T11:00:00',
+                is_folder: false,
             },
         ],
     };
+
 
     const data: DataItem[] = responseData.data;
 
@@ -217,6 +359,17 @@ export default function FileManager({ onFileClick }) {
     }, [fileSystem, currentPath]);
 
     const files = currentFolder ? Object.values(currentFolder.contents) : [];
+
+    // **Sorting the files as per your requirement**
+    const sortedFiles = React.useMemo(() => {
+        const folders = files
+            .filter((item) => item.type === 'folder')
+            .sort((a, b) => a.name.localeCompare(b.name));
+        const filesOnly = files
+            .filter((item) => item.type === 'file')
+            .sort((a, b) => a.name.localeCompare(b.name));
+        return [...folders, ...filesOnly];
+    }, [files]);
 
     const handleOpenModal = (type: string, file: FileItem | FolderItem) => {
         setModalType(type);
@@ -253,7 +406,7 @@ export default function FileManager({ onFileClick }) {
         <div>
             <BreadcrumbsNav currentPath={currentPath} onBreadcrumbClick={handleBreadcrumbClick} />
             <FileTable
-                files={files}
+                files={sortedFiles}
                 onFileClick={onFileClick}
                 onFolderClick={handleFolderClick}
                 onOpenModal={handleOpenModal}
