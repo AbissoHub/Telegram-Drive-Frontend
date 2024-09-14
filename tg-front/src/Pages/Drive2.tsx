@@ -11,7 +11,7 @@ import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import Layout from '../Components/Layout.tsx';
 import Navigation from '../Components/Navigation.tsx';
 import Header from '../Components/Header.tsx';
-import TableFiles from '../Components/TableFiles.tsx';
+import TableFiles from '../Components/FileManager/FileManager.tsx';
 import FileDetails from '../Components/FileDetails.tsx';
 
 export default function FilesExample() {

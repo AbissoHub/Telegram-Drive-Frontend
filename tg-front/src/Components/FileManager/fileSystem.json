@@ -1,0 +1,60 @@
+{
+  "MyFiles": {
+    "Travel pictures": {
+      "type": "folder",
+      "modified": "21 Oct 2023, 3PM",
+      "size": "987.5MB",
+      "owner": [
+        { "avatar": "https://i.pravatar.cc/24?img=6" },
+        { "avatar": "https://i.pravatar.cc/24?img=7" },
+        { "avatar": "https://i.pravatar.cc/24?img=8" },
+        { "avatar": "https://i.pravatar.cc/24?img=9" }
+      ],
+      "contents": {
+        "Summer Trip": {
+          "type": "file",
+          "modified": "22 Oct 2023, 10AM",
+          "size": "2.3GB",
+          "owner": [{ "avatar": "https://i.pravatar.cc/24?img=5" }]
+        }
+      }
+    },
+    "Important documents": {
+      "type": "folder",
+      "modified": "26 Sep 2023, 7PM",
+      "size": "232.3MB",
+      "owner": [
+        { "avatar": "https://i.pravatar.cc/24?img=1" },
+        { "avatar": "https://i.pravatar.cc/24?img=9" },
+        { "avatar": "https://i.pravatar.cc/24?img=2" },
+        { "avatar": "https://i.pravatar.cc/24?img=3" },
+        { "additional": 3 }
+      ],
+      "contents": {}
+    },
+    "Projects": {
+      "type": "folder",
+      "modified": "12 Aug 2021, 7PM",
+      "size": "1.6GB",
+      "owner": [
+        { "avatar": "https://i.pravatar.cc/24?img=4" },
+        { "avatar": "https://i.pravatar.cc/24?img=8" },
+        { "avatar": "https://i.pravatar.cc/24?img=5" }
+      ],
+      "contents": {}
+    },
+    "Invoices": {
+      "type": "folder",
+      "modified": "14 Mar 2021, 7PM",
+      "size": "123.3KB",
+      "owner": [{ "avatar": "https://i.pravatar.cc/24?img=2" }],
+      "contents": {}
+    },
+    "VideoLaureaExample": {
+      "type": "file",
+      "modified": "14 Mar 2021, 7PM",
+      "size": "123.3KB",
+      "owner": [{ "avatar": "https://i.pravatar.cc/24?img=2" }]
+    }
+  }
+}
