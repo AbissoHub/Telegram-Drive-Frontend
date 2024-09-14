@@ -97,7 +97,7 @@ export default function FilesExample() {
                             sx={{
                                 borderRadius: 'sm',
                                 gridColumn: '1/-1',
-                                display: { xs: 'none', md: 'flex' },
+                                display: 'flex', // Make it display on all screen sizes
                             }}
                         >
                             <TableFiles onFileClick={handleFileClick} />

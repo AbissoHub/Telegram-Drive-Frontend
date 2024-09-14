@@ -3,6 +3,7 @@ import Table from '@mui/joy/Table';
 import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
 import Box from '@mui/joy/Box';
+import { styled } from '@mui/joy/styles'; // Import styled
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
@@ -34,6 +35,10 @@ interface FileTableProps {
     onOpenModal: (type: string, item: FileItem | FolderItem) => void;
 }
 
+// Create styled components
+const StyledTh = styled('th')({});
+const StyledTd = styled('td')({});
+
 export default function FileTable({
                                       files,
                                       onFileClick,
@@ -44,30 +49,44 @@ export default function FileTable({
         <Table hoverRow size="sm" borderAxis="none" variant="soft">
             <thead>
             <tr>
-                <th>
+                <StyledTh>
                     <Typography level="title-sm">Name</Typography>
-                </th>
-                <th>
+                </StyledTh>
+                <StyledTh
+                    sx={{
+                        display: { xs: 'none', sm: 'table-cell' },
+                    }}
+                >
                     <Typography level="title-sm" endDecorator={<ArrowDropDownRoundedIcon />}>
                         Last modified
                     </Typography>
-                </th>
-                <th>
+                </StyledTh>
+                <StyledTh
+                    sx={{
+                        display: { xs: 'none', sm: 'table-cell' },
+                    }}
+                >
                     <Typography level="title-sm">Size</Typography>
-                </th>
-                <th>
+                </StyledTh>
+                <StyledTh>
                     <Typography level="title-sm">Actions</Typography>
-                </th>
+                </StyledTh>
             </tr>
             </thead>
             <tbody>
             {files.map((file, index) => (
                 <tr
                     key={index}
-                    onClick={() => file.type === 'file' && onFileClick(file)}
-                    style={{ cursor: file.type === 'file' ? 'pointer' : 'default' }}
+                    onClick={() => {
+                        if (file.type === 'file') {
+                            onFileClick(file);
+                        } else if (file.type === 'folder') {
+                            onFolderClick(file.name);
+                        }
+                    }}
+                    style={{ cursor: 'pointer' }}
                 >
-                    <td>
+                    <StyledTd>
                         <Typography
                             level="title-sm"
                             startDecorator={
@@ -78,22 +97,37 @@ export default function FileTable({
                                 )
                             }
                             sx={{ alignItems: 'flex-start' }}
-                            onClick={() => file.type === 'folder' && onFolderClick(file.name)}
                         >
                             {file.name}
                         </Typography>
-                    </td>
-                    <td>
+                    </StyledTd>
+                    <StyledTd
+                        sx={{
+                            display: { xs: 'none', sm: 'table-cell' },
+                        }}
+                    >
                         <Typography level="body-sm">{file.modified}</Typography>
-                    </td>
-                    <td>
+                    </StyledTd>
+                    <StyledTd
+                        sx={{
+                            display: { xs: 'none', sm: 'table-cell' },
+                        }}
+                    >
                         <Typography level="body-sm">{file.size}</Typography>
-                    </td>
-                    <td>
+                    </StyledTd>
+                    <StyledTd>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                            {/* Show download icon only for files */}
                             {file.type === 'file' && (
-                                <IconButton variant="plain" color="neutral" size="sm" aria-label="Download">
+                                <IconButton
+                                    variant="plain"
+                                    color="neutral"
+                                    size="sm"
+                                    aria-label="Download"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        // Implementa qui la logica di download
+                                    }}
+                                >
                                     <DownloadRoundedIcon />
                                 </IconButton>
                             )}
@@ -122,7 +156,7 @@ export default function FileTable({
                                 <DeleteRoundedIcon />
                             </IconButton>
                         </Box>
-                    </td>
+                    </StyledTd>
                 </tr>
             ))}
             </tbody>
