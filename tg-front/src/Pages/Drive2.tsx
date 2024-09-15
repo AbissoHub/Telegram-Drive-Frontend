@@ -16,7 +16,8 @@ import FileDetails from '../Components/FileDetails.tsx';
 
 export default function FilesExample() {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
-    const [selectedFile, setSelectedFile] = React.useState(null); // Stato per il file selezionato
+    const [selectedFile, setSelectedFile] = React.useState(null);
+    const [selectedSection, setSelectedSection] = React.useState('myFiles'); // Stato per la sezione selezionata
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -31,7 +32,10 @@ export default function FilesExample() {
             <CssBaseline />
             {drawerOpen && (
                 <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
-                    <Navigation />
+                    <Navigation
+                        selectedSection={selectedSection}
+                        onSectionChange={setSelectedSection}
+                    />
                 </Layout.SideDrawer>
             )}
 
@@ -69,7 +73,10 @@ export default function FilesExample() {
                 sx={[
                     {
                         gridTemplateColumns: selectedFile
-                            ? { xs: '1fr', md: 'minmax(160px, 300px) minmax(600px, 1fr) minmax(300px, 420px)' } // Con tendina aperta
+                            ? {
+                                xs: '1fr',
+                                md: 'minmax(160px, 300px) minmax(600px, 1fr) minmax(300px, 420px)',
+                            } // Con tendina aperta
                             : { xs: '1fr', md: 'minmax(160px, 300px) 1fr' }, // Con tendina chiusa
                     },
                     drawerOpen && {
@@ -82,7 +89,10 @@ export default function FilesExample() {
                     <Header />
                 </Layout.Header>
                 <Layout.SideNav>
-                    <Navigation />
+                    <Navigation
+                        selectedSection={selectedSection}
+                        onSectionChange={setSelectedSection}
+                    />
                 </Layout.SideNav>
                 <Layout.Main>
                     <Box
@@ -97,10 +107,13 @@ export default function FilesExample() {
                             sx={{
                                 borderRadius: 'sm',
                                 gridColumn: '1/-1',
-                                display: 'flex', // Make it display on all screen sizes
+                                display: 'flex',
                             }}
                         >
-                            <TableFiles onFileClick={handleFileClick} />
+                            <TableFiles
+                                onFileClick={handleFileClick}
+                                selectedSection={selectedSection}
+                            />
                         </Sheet>
                     </Box>
                 </Layout.Main>
