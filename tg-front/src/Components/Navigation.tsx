@@ -9,13 +9,17 @@ import ListItemContent from '@mui/joy/ListItemContent';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import UploadButton from "./UploadButton.tsx";
 
 interface NavigationProps {
   selectedSection: string;
-  onSectionChange: (section: string) => void;
+  onSectionChange?: (section: string) => void;
 }
 
-export default function Navigation({ selectedSection, onSectionChange }: NavigationProps) {
+export default function Navigation({
+                                     selectedSection,
+                                     onSectionChange = () => {},
+                                   }: NavigationProps) {
   return (
       <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px' }}>
         <ListItem nested>
@@ -59,6 +63,22 @@ export default function Navigation({ selectedSection, onSectionChange }: Navigat
                 <ListItemContent>Trash</ListItemContent>
               </ListItemButton>
             </ListItem>
+          </List>
+        </ListItem>
+        <ListItem nested>
+          <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
+            Upload
+          </ListSubheader>
+          <List
+              aria-labelledby="nav-list-browse"
+              sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
+          >
+            <ListItem>
+
+              <UploadButton></UploadButton>
+
+            </ListItem>
+
           </List>
         </ListItem>
       </List>

@@ -17,7 +17,7 @@ import FileDetails from '../Components/FileDetails.tsx';
 export default function FilesExample() {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const [selectedFile, setSelectedFile] = React.useState(null);
-    const [selectedSection, setSelectedSection] = React.useState('myFiles'); // Stato per la sezione selezionata
+    const [selectedSection, setSelectedSection] = React.useState('myFiles');
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -59,12 +59,10 @@ export default function FilesExample() {
                 <Button
                     variant="plain"
                     color="neutral"
-                    aria-pressed="true"
-                    component="a"
-                    href="/joy-ui/getting-started/templates/files/"
                     size="sm"
                     startDecorator={<FolderRoundedIcon />}
                     sx={{ flexDirection: 'column', '--Button-gap': 0 }}
+                    onClick={() => setDrawerOpen(true)} // Aggiunto l'handler per aprire il cassetto
                 >
                     Files
                 </Button>
@@ -76,8 +74,8 @@ export default function FilesExample() {
                             ? {
                                 xs: '1fr',
                                 md: 'minmax(160px, 300px) minmax(600px, 1fr) minmax(300px, 420px)',
-                            } // Con tendina aperta
-                            : { xs: '1fr', md: 'minmax(160px, 300px) 1fr' }, // Con tendina chiusa
+                            }
+                            : { xs: '1fr', md: 'minmax(160px, 300px) 1fr' },
                     },
                     drawerOpen && {
                         height: '100vh',
@@ -88,7 +86,11 @@ export default function FilesExample() {
                 <Layout.Header>
                     <Header />
                 </Layout.Header>
-                <Layout.SideNav>
+                <Layout.SideNav
+                    sx={{
+                        display: { xs: 'none', sm: 'block' }, // Nasconde il SideNav su mobile
+                    }}
+                >
                     <Navigation
                         selectedSection={selectedSection}
                         onSectionChange={setSelectedSection}
