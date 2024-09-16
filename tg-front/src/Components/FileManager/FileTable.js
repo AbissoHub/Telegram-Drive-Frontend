@@ -11,30 +11,6 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 
-interface FileItem {
-    type: 'file';
-    name: string;
-    modified: string;
-    size: string;
-    owner: { avatar: string }[];
-}
-
-interface FolderItem {
-    type: 'folder';
-    name: string;
-    modified: string;
-    size: string;
-    owner: { avatar: string }[];
-    contents: Record<string, FileItem | FolderItem>;
-}
-
-interface FileTableProps {
-    files: (FileItem | FolderItem)[];
-    onFileClick: (file: FileItem) => void;
-    onFolderClick: (folderName: string) => void;
-    onOpenModal: (type: string, item: FileItem | FolderItem) => void;
-}
-
 // Create styled components
 const StyledTh = styled('th')({});
 const StyledTd = styled('td')({});
@@ -44,7 +20,7 @@ export default function FileTable({
                                       onFileClick,
                                       onFolderClick,
                                       onOpenModal,
-                                  }: FileTableProps) {
+                                  }) {
     return (
         <Table hoverRow size="sm" borderAxis="none" variant="soft">
             <thead>
@@ -125,7 +101,7 @@ export default function FileTable({
                                     aria-label="Download"
                                     onClick={(event) => {
                                         event.stopPropagation();
-                                        // Implementa qui la logica di download
+                                        // Implement download logic here
                                     }}
                                 >
                                     <DownloadRoundedIcon />

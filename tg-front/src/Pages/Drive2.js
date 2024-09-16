@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
@@ -8,16 +8,16 @@ import Stack from '@mui/joy/Stack';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
-import Layout from '../Components/Layout.tsx';
-import Navigation from '../Components/Navigation.tsx';
-import Header from '../Components/Header.tsx';
-import TableFiles from '../Components/FileManager/FileManager.tsx';
-import FileDetails from '../Components/FileDetails.tsx';
+import Layout from '../Components/Layout';
+import Navigation from '../Components/Navigation';
+import Header from '../Components/Header';
+import TableFiles from '../Components/FileManager/FileManager';
+import FileDetails from '../Components/FileDetails';
 
 export default function FilesExample() {
-    const [drawerOpen, setDrawerOpen] = React.useState(false);
-    const [selectedFile, setSelectedFile] = React.useState(null);
-    const [selectedSection, setSelectedSection] = React.useState('myFiles');
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedSection, setSelectedSection] = useState('myFiles');
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -62,7 +62,7 @@ export default function FilesExample() {
                     size="sm"
                     startDecorator={<FolderRoundedIcon />}
                     sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-                    onClick={() => setDrawerOpen(true)} // Aggiunto l'handler per aprire il cassetto
+                    onClick={() => setDrawerOpen(true)}
                 >
                     Files
                 </Button>
@@ -88,7 +88,7 @@ export default function FilesExample() {
                 </Layout.Header>
                 <Layout.SideNav
                     sx={{
-                        display: { xs: 'none', sm: 'block' }, // Nasconde il SideNav su mobile
+                        display: { xs: 'none', sm: 'block' },
                     }}
                 >
                     <Navigation

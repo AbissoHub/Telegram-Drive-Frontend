@@ -1,42 +1,12 @@
-import * as React from 'react';
-import BreadcrumbsNav from './BreadcrumbsNav.tsx';
-import FileTable from './FileTable.tsx';
-import FileActionsModal from './FileActionsModal.tsx';
+import React, { useState, useEffect, useMemo } from 'react';
+import BreadcrumbsNav from './BreadcrumbsNav';
+import FileTable from './FileTable';
+import FileActionsModal from './FileActionsModal';
 
-// Type definitions for File and Folder
-type FileItem = {
-    type: 'file';
-    name: string;
-    modified: string;
-    size: string;
-    owner: { avatar: string }[];
-};
-
-type FolderItem = {
-    type: 'folder';
-    name: string;
-    modified: string;
-    size: string;
-    owner: { avatar: string }[];
-    contents: Record<string, FileItem | FolderItem>;
-};
-
-// Type for the data items provided
-type DataItem = {
-    id_message: string;
-    media_name: string;
-    locate_media: string;
-    media_size: number;
-    media_type: string;
-    message_text: string;
-    date: string;
-    is_folder: boolean;
-};
-
-// Function to format the date
-function formatModifiedDate(dateStr: string): string {
+// Funzione per formattare la data
+function formatModifiedDate(dateStr) {
     const date = new Date(dateStr);
-    const options: Intl.DateTimeFormatOptions = {
+    const options = {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -46,8 +16,8 @@ function formatModifiedDate(dateStr: string): string {
     return date.toLocaleString('it-IT', options);
 }
 
-// Function to format the file size
-function formatSize(sizeInMB: number): string {
+// Funzione per formattare la dimensione del file
+function formatSize(sizeInMB) {
     if (sizeInMB >= 1024) {
         return (sizeInMB / 1024).toFixed(1) + 'GB';
     } else if (sizeInMB >= 1) {
@@ -57,9 +27,9 @@ function formatSize(sizeInMB: number): string {
     }
 }
 
-// Function to build the file system structure from the data
-function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
-    const rootFolder: FolderItem = {
+// Funzione per costruire la struttura del file system dai dati
+function buildFileSystem(data, rootFolderName) {
+    const rootFolder = {
         type: 'folder',
         name: rootFolderName,
         modified: '',
@@ -73,11 +43,10 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
         let name = item.media_name;
 
         if (item.is_folder) {
-            // For folders, get the folder name from the path if media_name is 'None'
             if (name === 'None') {
                 const pathParts = path.split('/').filter(Boolean);
                 if (pathParts.length > 0) {
-                    name = pathParts.pop()!;
+                    name = pathParts.pop();
                     path = pathParts.join('/');
                 } else {
                     name = rootFolderName;
@@ -85,7 +54,6 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
                 }
             }
         } else {
-            // For files, skip if media_name is 'None'
             if (name === 'None') {
                 return;
             }
@@ -101,7 +69,6 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
             const isLastPart = i === pathParts.length - 1;
 
             if (isLastPart && !item.is_folder) {
-                // It's a file
                 currentFolder.contents[part] = {
                     type: 'file',
                     name: part,
@@ -110,7 +77,6 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
                     owner: [],
                 };
             } else {
-                // It's a folder
                 if (!currentFolder.contents[part]) {
                     currentFolder.contents[part] = {
                         type: 'folder',
@@ -123,7 +89,7 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
                 }
 
                 if (currentFolder.contents[part].type === 'folder') {
-                    currentFolder = currentFolder.contents[part] as FolderItem;
+                    currentFolder = currentFolder.contents[part];
                 } else {
                     console.warn(`Expected a folder at ${part}, but found a file.`);
                     break;
@@ -135,8 +101,8 @@ function buildFileSystem(data: DataItem[], rootFolderName: string): FolderItem {
     return rootFolder;
 }
 
-// Helper function to get the current folder based on the path
-function getFolderFromPath(root: FolderItem, path: string[]): FolderItem | null {
+// Funzione helper per ottenere la cartella corrente in base al percorso
+function getFolderFromPath(root, path) {
     let currentFolder = root;
     for (let i = 1; i < path.length; i++) {
         const folderName = path[i];
@@ -144,7 +110,7 @@ function getFolderFromPath(root: FolderItem, path: string[]): FolderItem | null 
             currentFolder.contents[folderName] &&
             currentFolder.contents[folderName].type === 'folder'
         ) {
-            currentFolder = currentFolder.contents[folderName] as FolderItem;
+            currentFolder = currentFolder.contents[folderName];
         } else {
             return null;
         }
@@ -152,19 +118,14 @@ function getFolderFromPath(root: FolderItem, path: string[]): FolderItem | null 
     return currentFolder;
 }
 
-interface FileManagerProps {
-    onFileClick: (file: FileItem) => void;
-    selectedSection: string;
-}
-
-export default function FileManager({ onFileClick, selectedSection }: FileManagerProps) {
-    const [data, setData] = React.useState<DataItem[]>([]);
-    const [fileSystem, setFileSystem] = React.useState<FolderItem | null>(null);
-    const [currentPath, setCurrentPath] = React.useState<string[]>([]);
-    const [open, setOpen] = React.useState(false);
-    const [modalType, setModalType] = React.useState('');
-    const [selectedFile, setSelectedFile] = React.useState<FileItem | FolderItem | null>(null);
-    const [newName, setNewName] = React.useState('');
+export default function FileManager({ onFileClick, selectedSection }) {
+    const [data, setData] = useState([]);
+    const [fileSystem, setFileSystem] = useState(null);
+    const [currentPath, setCurrentPath] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [modalType, setModalType] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [newName, setNewName] = useState('');
 
     const rootFolderName =
         selectedSection === 'myFiles'
@@ -173,6 +134,7 @@ export default function FileManager({ onFileClick, selectedSection }: FileManage
                 ? 'SharedFiles'
                 : 'Trash';
 
+    // Fetch data when selectedSection changes
     // Fetch data when selectedSection changes
     React.useEffect(() => {
         // Reset current path
@@ -573,20 +535,19 @@ export default function FileManager({ onFileClick, selectedSection }: FileManage
     }, [selectedSection]);
 
     // Build the file system when data changes
-    React.useEffect(() => {
+    useEffect(() => {
         const newFileSystem = buildFileSystem(data, rootFolderName);
         setFileSystem(newFileSystem);
     }, [data, rootFolderName]);
 
-    const currentFolder = React.useMemo(() => {
+    const currentFolder = useMemo(() => {
         if (!fileSystem) return null;
         return getFolderFromPath(fileSystem, currentPath);
     }, [fileSystem, currentPath]);
 
     const files = currentFolder ? Object.values(currentFolder.contents) : [];
 
-    // Sorting the files
-    const sortedFiles = React.useMemo(() => {
+    const sortedFiles = useMemo(() => {
         const folders = files
             .filter((item) => item.type === 'folder')
             .sort((a, b) => a.name.localeCompare(b.name));
@@ -596,7 +557,7 @@ export default function FileManager({ onFileClick, selectedSection }: FileManage
         return [...folders, ...filesOnly];
     }, [files]);
 
-    const handleOpenModal = (type: string, file: FileItem | FolderItem) => {
+    const handleOpenModal = (type, file) => {
         setModalType(type);
         setSelectedFile(file);
         setOpen(true);
@@ -610,20 +571,20 @@ export default function FileManager({ onFileClick, selectedSection }: FileManage
     };
 
     const handleRename = () => {
-        // Implementa la logica di rinomina
+        // Implement rename logic
         handleCloseModal();
     };
 
     const handleDelete = () => {
-        // Implementa la logica di cancellazione
+        // Implement delete logic
         handleCloseModal();
     };
 
-    const handleFolderClick = (folderName: string) => {
+    const handleFolderClick = (folderName) => {
         setCurrentPath([...currentPath, folderName]);
     };
 
-    const handleBreadcrumbClick = (index: number) => {
+    const handleBreadcrumbClick = (index) => {
         setCurrentPath(currentPath.slice(0, index + 1));
     };
 

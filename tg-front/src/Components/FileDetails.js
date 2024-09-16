@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Sheet,
@@ -17,12 +17,12 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import FileActionsModal from '../Components/FileManager/FileActionsModal.tsx'; // Assicurati che il percorso del file sia corretto
+import FileActionsModal from './FileManager/FileActionsModal'; // Assicurati che il percorso del file sia corretto
 
 export default function FileDetails({ file, onClose }) {
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [modalType, setModalType] = React.useState('');
-    const [newName, setNewName] = React.useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalType, setModalType] = useState('');
+    const [newName, setNewName] = useState('');
 
     const handleOpenModal = (type) => {
         setModalType(type);
@@ -127,7 +127,7 @@ export default function FileDetails({ file, onClose }) {
                             </Button>
                         </Box>
                     </TabPanel>
-                    {/* Activity tab could be customized similarly */}
+                    {/* La scheda Activity può essere personalizzata in modo simile */}
                 </Tabs>
             </Sheet>
 

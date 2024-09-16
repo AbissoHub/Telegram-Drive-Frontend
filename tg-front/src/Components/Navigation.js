@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import List from '@mui/joy/List';
 import ListSubheader from '@mui/joy/ListSubheader';
 import ListItem from '@mui/joy/ListItem';
@@ -9,17 +9,9 @@ import ListItemContent from '@mui/joy/ListItemContent';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import UploadButton from "./UploadButton.tsx";
+import UploadButton from "./UploadButton.js";
 
-interface NavigationProps {
-  selectedSection: string;
-  onSectionChange?: (section: string) => void;
-}
-
-export default function Navigation({
-                                     selectedSection,
-                                     onSectionChange = () => {},
-                                   }: NavigationProps) {
+export default function Navigation({ selectedSection, onSectionChange = () => {} }) {
   return (
       <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px' }}>
         <ListItem nested>
@@ -74,11 +66,8 @@ export default function Navigation({
               sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
             <ListItem>
-
-              <UploadButton></UploadButton>
-
+              <UploadButton />
             </ListItem>
-
           </List>
         </ListItem>
       </List>

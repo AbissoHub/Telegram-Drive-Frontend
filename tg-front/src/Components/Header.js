@@ -28,38 +28,35 @@ import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
-import Navigation from './Navigation.tsx';
+import Navigation from './Navigation.js';
 
 function ColorSchemeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) {
-    return <IconButton size="sm" variant="outlined" color="primary" />;
-  }
-  return (
-      <Tooltip title="Change theme" variant="outlined">
-        <IconButton
-            data-screenshot="toggle-mode"
-            size="sm"
-            variant="plain"
-            color="neutral"
-            sx={{ alignSelf: 'center' }}
-            onClick={() => {
-              if (mode === 'light') {
-                setMode('dark');
-              } else {
-                setMode('light');
-              }
-            }}
-        >
-          {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
-        </IconButton>
-      </Tooltip>
-  );
+    const { mode, setMode } = useColorScheme();
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+    if (!mounted) {
+        return <IconButton size="sm" variant="outlined" color="primary" />;
+    }
+    return (
+        <Tooltip title="Change theme" variant="outlined">
+            <IconButton
+                data-screenshot="toggle-mode"
+                size="sm"
+                variant="plain"
+                color="neutral"
+                sx={{ alignSelf: 'center' }}
+                onClick={() => {
+                    setMode(mode === 'light' ? 'dark' : 'light');
+                }}
+            >
+                {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
+            </IconButton>
+        </Tooltip>
+    );
 }
+
 export default function Header() {
     const [open, setOpen] = React.useState(false);
     return (
@@ -83,7 +80,7 @@ export default function Header() {
                 </IconButton>
             </Stack>
 
-            {/* Box per centrare la barra di ricerca sui grandi schermi */}
+            {/* Box for centering the search bar on larger screens */}
             <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' }, justifyContent: 'center', px: 2 }}>
                 <Input
                     size="sm"
@@ -103,13 +100,13 @@ export default function Header() {
                     }
                     sx={{
                         alignSelf: 'center',
-                        maxWidth: '800px', // Aumenta la lunghezza della barra di ricerca
-                        width: '100%', // Occupa tutto lo spazio disponibile all'interno del contenitore
+                        maxWidth: '800px',
+                        width: '100%',
                     }}
                 />
             </Box>
 
-            {/* Versione mobile identica al codice originale */}
+            {/* Mobile version */}
             <Box sx={{ display: { xs: 'inline-flex', sm: 'none' }, flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                 <IconButton variant="plain" color="neutral" onClick={() => setOpen(true)}>
                     <MenuRoundedIcon />
@@ -186,7 +183,6 @@ export default function Header() {
                             Settings
                         </MenuItem>
                         <ListDivider />
-
                         <MenuItem
                             component="a"
                             href="https://github.com/mui/material-ui/tree/master/docs/data/joy/getting-started/templates/email"

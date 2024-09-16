@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Button from '@mui/joy/Button';
 import SvgIcon from '@mui/joy/SvgIcon';
 import Modal from '@mui/joy/Modal';
@@ -12,9 +12,9 @@ const VisuallyHiddenInput = styled('input')`
 `;
 
 const UploadButton = () => {
-    const [open, setOpen] = React.useState(false);
-    const [selectedFile, setSelectedFile] = React.useState('');
-    const [destinationPath, setDestinationPath] = React.useState('');
+    const [open, setOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState('');
+    const [destinationPath, setDestinationPath] = useState('');
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -113,7 +113,7 @@ const UploadButton = () => {
 
                     <Select
                         placeholder="Select Destination Path"
-                        onChange={(event, newValue) => handleDestinationChange(event, newValue)}
+                        onChange={handleDestinationChange}
                         sx={{ mb: 2 }}
                         value={destinationPath}
                     >
