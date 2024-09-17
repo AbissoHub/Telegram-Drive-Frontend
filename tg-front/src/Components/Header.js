@@ -16,6 +16,8 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
+import { useSession } from '../Components/SessionContext'; // Importa il contesto per gestire il logout
+import { toast } from 'sonner'; // Importa la libreria 'sonner' per mostrare il toast
 
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
@@ -58,7 +60,14 @@ function ColorSchemeToggle() {
 }
 
 export default function Header() {
+    const { logout } = useSession(); // Usa il logout dal contesto della sessione
     const [open, setOpen] = React.useState(false);
+
+    const handleLogout = () => {
+        logout(); // Esegui il logout
+        toast.success('Logout successfully!'); // Mostra il toast di successo
+    };
+
     return (
         <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
             <Stack
@@ -80,7 +89,6 @@ export default function Header() {
                 </IconButton>
             </Stack>
 
-            {/* Box for centering the search bar on larger screens */}
             <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' }, justifyContent: 'center', px: 2 }}>
                 <Input
                     size="sm"
@@ -106,7 +114,6 @@ export default function Header() {
                 />
             </Box>
 
-            {/* Mobile version */}
             <Box sx={{ display: { xs: 'inline-flex', sm: 'none' }, flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                 <IconButton variant="plain" color="neutral" onClick={() => setOpen(true)}>
                     <MenuRoundedIcon />
@@ -191,7 +198,7 @@ export default function Header() {
                             <OpenInNewRoundedIcon />
                         </MenuItem>
                         <ListDivider />
-                        <MenuItem>
+                        <MenuItem onClick={handleLogout}> {/* Usa handleLogout per il logout e il toast */}
                             <LogoutRoundedIcon />
                             Log out
                         </MenuItem>

@@ -146,7 +146,7 @@ export default function FileManager({ onFileClick, selectedSection }) {
             await new Promise((resolve) => setTimeout(resolve, 500));
 
             // Simulate data for each section
-            let sectionData: DataItem[] = [];
+            let sectionData = []
 
             if (selectedSection === 'myFiles') {
                 // Use your responseData as an example
