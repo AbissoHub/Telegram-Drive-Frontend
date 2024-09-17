@@ -2,7 +2,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Login from "./Pages/Login";
-import Drive from "./Pages/Drive2";
+import Drive from "./Pages/Drive";
 import { Toaster } from "sonner";
 import { SessionProvider, useSession } from './Components/SessionContext';
 
@@ -25,7 +25,7 @@ function App() {
             <Toaster position={"bottom-center"} richColors />
             <Routes>
                 <Route path="/" element={<Login baseUrl={BASE_URL} />} />
-                <Route path="/drive" element={<Drive />} />
+                <Route path="/drive" element={<Drive baseUrl={BASE_URL} />} />
             </Routes>
         </div>
     );

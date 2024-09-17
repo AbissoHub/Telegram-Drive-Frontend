@@ -15,9 +15,12 @@ export default function FileActionsModal({
                                              onClose,
                                              onRename,
                                              onDelete,
+                                             onMove,
                                              selectedFile,
                                              newName,
-                                             setNewName
+                                             setNewName,
+                                             newLocation,
+                                             setNewLocation
                                          }) {
     return (
         <Modal open={open} onClose={onClose}>
@@ -57,6 +60,28 @@ export default function FileActionsModal({
                             <Button variant="plain" onClick={onClose}>Cancel</Button>
                             <Button variant="solid" color="danger" onClick={onDelete}>Delete</Button>
                         </Stack>
+                    </>
+                )}
+
+                {modalType === 'move' && (
+                    <>
+                        <DialogTitle>Move File</DialogTitle>
+                        <DialogContent>
+                            <form onSubmit={(event) => { event.preventDefault(); onMove(); }}>
+                                <Stack spacing={2}>
+                                    <FormControl>
+                                        <FormLabel>New Location</FormLabel>
+                                        <Input
+                                            autoFocus
+                                            required
+                                            value={newLocation}
+                                            onChange={(e) => setNewLocation(e.target.value)}
+                                        />
+                                    </FormControl>
+                                    <Button type="submit">Move</Button>
+                                </Stack>
+                            </form>
+                        </DialogContent>
                     </>
                 )}
             </ModalDialog>

@@ -10,8 +10,9 @@ import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import UploadButton from "./UploadButton.js";
+import SyncButton from "./SyncButton";
 
-export default function Navigation({ selectedSection, onSectionChange = () => {} }) {
+export default function Navigation({ baseUrl, selectedSection, onSectionChange = () => {} }) {
   return (
       <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px' }}>
         <ListItem nested>
@@ -59,7 +60,7 @@ export default function Navigation({ selectedSection, onSectionChange = () => {}
         </ListItem>
         <ListItem nested>
           <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
-            Upload
+            Actions
           </ListSubheader>
           <List
               aria-labelledby="nav-list-browse"
@@ -68,8 +69,13 @@ export default function Navigation({ selectedSection, onSectionChange = () => {}
             <ListItem>
               <UploadButton />
             </ListItem>
+            <ListItem>
+              <SyncButton baseUrl={baseUrl} />
+            </ListItem>
           </List>
         </ListItem>
+
+
       </List>
   );
 }

@@ -35,8 +35,11 @@ const Login = ({ baseUrl }) => {
             .then((response) => {
                 const token = response.data.token;
                 if (token) {
+                    const clusterIdPrivate = response.data.r
+                    const clusterIdPublic = response.data.u
+
                     session.defaults.headers['Authorization'] = token;
-                    saveToken(token);
+                    saveToken(token, clusterIdPublic, clusterIdPrivate);
                     navigate('/drive');
                     return token;
                 } else {

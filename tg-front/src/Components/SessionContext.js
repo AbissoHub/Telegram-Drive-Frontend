@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Creazione del contesto per la sessione
 const SessionContext = createContext(undefined);
 
-// Hook personalizzato per utilizzare il contesto della sessione
 export function useSession() {
     const context = useContext(SessionContext);
     if (!context) {
@@ -12,27 +10,33 @@ export function useSession() {
     return context;
 }
 
-// Provider per fornire il contesto della sessione ai componenti
 export function SessionProvider({ children }) {
-    // Inizializza il token dal sessionStorage se presente
     const [token, setToken] = useState(() => sessionStorage.getItem('token'));
+    const [clusterIdPrivate, setClusterIdPrivate] = useState(() => sessionStorage.getItem('cluster_id_private'));
+    const [clusterIdPublic, setClusterIdPublic] = useState(() => sessionStorage.getItem('cluster_id_public'));
 
-    // Funzione per impostare il token di sessione
-    const login = (newToken) => {
+    const login = (newToken, newClusterIdPrivate, newClusterIdPublic) => {
         setToken(newToken);
-        sessionStorage.setItem('token', newToken); // Salva il token in sessionStorage
+        setClusterIdPrivate(newClusterIdPrivate);
+        setClusterIdPublic(newClusterIdPublic);
+        sessionStorage.setItem('token', newToken);
+        sessionStorage.setItem('cluster_id_private', newClusterIdPrivate);
+        sessionStorage.setItem('cluster_id_public', newClusterIdPublic);
     };
 
-    // Funzione per terminare la sessione
     const logout = () => {
         setToken(null);
-        sessionStorage.removeItem('token'); // Rimuovi il token da sessionStorage
+        setClusterIdPrivate(null);
+        setClusterIdPublic(null);
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('cluster_id_private');
+        sessionStorage.removeItem('cluster_id_public');
     };
 
-    const isAuthenticated = !!token; // L'utente è autenticato se c'è un token
+    const isAuthenticated = !!token;
 
     return (
-        <SessionContext.Provider value={{ token, login, logout, isAuthenticated }}>
+        <SessionContext.Provider value={{ token, clusterIdPrivate, clusterIdPublic, login, logout, isAuthenticated }}>
             {children}
         </SessionContext.Provider>
     );

@@ -16,7 +16,7 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
-import { useSession } from '../Components/SessionContext'; // Importa il contesto per gestire il logout
+import { useSession } from './SessionContext'; // Importa il contesto per gestire il logout
 import { toast } from 'sonner'; // Importa la libreria 'sonner' per mostrare il toast
 
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -29,6 +29,7 @@ import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+
 
 import Navigation from './Navigation.js';
 
@@ -59,14 +60,35 @@ function ColorSchemeToggle() {
     );
 }
 
-export default function Header() {
-    const { logout } = useSession(); // Usa il logout dal contesto della sessione
+export default function Header({baseUrl}) {
+    const { logout } = useSession();
     const [open, setOpen] = React.useState(false);
 
     const handleLogout = () => {
-        logout(); // Esegui il logout
-        toast.success('Logout successfully!'); // Mostra il toast di successo
+        logout();
+        toast.success('Logout successfully!');
     };
+
+    const handleLanguageClick = () => {
+        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/ping-pong`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Error fetching connection status.');
+            }
+            return response.json();
+        });
+
+        toast.promise(fetchPromise, {
+            loading: 'Fetching connection status...',
+            success: (data) => `Connection status: True`,
+            error: (error) => error.message || 'Failed to fetch connection status.',
+        });
+    };
+
 
     return (
         <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -84,6 +106,7 @@ export default function Header() {
                     variant="outlined"
                     color="neutral"
                     sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderRadius: '50%' }}
+                    onClick={handleLanguageClick}
                 >
                     <LanguageRoundedIcon />
                 </IconButton>

@@ -14,7 +14,7 @@ import Header from '../Components/Header';
 import TableFiles from '../Components/FileManager/FileManager';
 import FileDetails from '../Components/FileDetails';
 
-export default function FilesExample() {
+export default function Drive (baseUrl) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedSection, setSelectedSection] = useState('myFiles');
@@ -33,6 +33,7 @@ export default function FilesExample() {
             {drawerOpen && (
                 <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
                     <Navigation
+                        baseUrl={baseUrl}
                         selectedSection={selectedSection}
                         onSectionChange={setSelectedSection}
                     />
@@ -84,7 +85,7 @@ export default function FilesExample() {
                 ]}
             >
                 <Layout.Header>
-                    <Header />
+                    <Header baseUrl={baseUrl} />
                 </Layout.Header>
                 <Layout.SideNav
                     sx={{
@@ -92,6 +93,7 @@ export default function FilesExample() {
                     }}
                 >
                     <Navigation
+                        baseUrl={baseUrl}
                         selectedSection={selectedSection}
                         onSectionChange={setSelectedSection}
                     />
@@ -115,6 +117,7 @@ export default function FilesExample() {
                             <TableFiles
                                 onFileClick={handleFileClick}
                                 selectedSection={selectedSection}
+                                baseUrl={baseUrl}
                             />
                         </Sheet>
                     </Box>

@@ -69,9 +69,7 @@ export default function FileDetails({ file, onClose }) {
                         <Tab sx={{ flexGrow: 1 }}>
                             <Typography level="title-sm">Details</Typography>
                         </Tab>
-                        <Tab sx={{ flexGrow: 1 }}>
-                            <Typography level="title-sm">Activity</Typography>
-                        </Tab>
+
                     </TabList>
                     <TabPanel value={0} sx={{ p: 0 }}>
                         <AspectRatio ratio="21/9">
