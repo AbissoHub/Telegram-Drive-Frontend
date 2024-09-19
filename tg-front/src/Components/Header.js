@@ -6,7 +6,6 @@ import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
 import Avatar from '@mui/joy/Avatar';
 import Input from '@mui/joy/Input';
-import Button from '@mui/joy/Button';
 import Tooltip from '@mui/joy/Tooltip';
 import Dropdown from '@mui/joy/Dropdown';
 import Menu from '@mui/joy/Menu';
@@ -16,8 +15,8 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
-import { useSession } from './SessionContext'; // Importa il contesto per gestire il logout
-import { toast } from 'sonner'; // Importa la libreria 'sonner' per mostrare il toast
+import { useSession } from './SessionContext';
+import { toast } from 'sonner';
 
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
@@ -61,7 +60,7 @@ function ColorSchemeToggle() {
 }
 
 export default function Header({baseUrl}) {
-    const { logout } = useSession();
+    const { logout, lastLogin, role, urlAvatar, email } = useSession();
     const [open, setOpen] = React.useState(false);
 
     const handleLogout = () => {
@@ -109,6 +108,7 @@ export default function Header({baseUrl}) {
                     onClick={handleLanguageClick}
                 >
                     <LanguageRoundedIcon />
+
                 </IconButton>
             </Stack>
 
@@ -189,16 +189,16 @@ export default function Header({baseUrl}) {
                         <MenuItem>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Avatar
-                                    src="https://i.pravatar.cc/40?img=2"
-                                    srcSet="https://i.pravatar.cc/80?img=2"
+                                    src={urlAvatar}
+                                    srcSet={urlAvatar}
                                     sx={{ borderRadius: '50%' }}
                                 />
                                 <Box sx={{ ml: 1.5 }}>
                                     <Typography level="title-sm" textColor="text.primary">
-                                        Rick Sanchez
+                                        {role}
                                     </Typography>
                                     <Typography level="body-xs" textColor="text.tertiary">
-                                        rick@email.com
+                                        {email}
                                     </Typography>
                                 </Box>
                             </Box>

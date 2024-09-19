@@ -5,7 +5,6 @@ import FileActionsModal from './FileActionsModal';
 import { toast } from 'sonner';
 import { useSession } from '../SessionContext';
 
-// Funzione per formattare la data
 function formatModifiedDate(dateStr) {
     const date = new Date(dateStr);
     const options = {
@@ -18,7 +17,6 @@ function formatModifiedDate(dateStr) {
     return date.toLocaleString('it-IT', options);
 }
 
-// Funzione per formattare la dimensione del file
 function formatSize(sizeInMB) {
     if (sizeInMB >= 1024) {
         return (sizeInMB / 1024).toFixed(1) + 'GB';
@@ -29,8 +27,7 @@ function formatSize(sizeInMB) {
     }
 }
 
-// Funzione per costruire la struttura del file system dai dati
-function buildFileSystem(data, rootFolderName) {
+function buildFileSystem(data, rootFolderName, isTrash = false) {
     const rootFolder = {
         type: 'folder',
         name: rootFolderName,
@@ -41,60 +38,82 @@ function buildFileSystem(data, rootFolderName) {
     };
 
     data.forEach((item) => {
-        let path = item.locate_media.replace(/^\.\//, '');
-        let name = item.media_name;
-
-        if (item.is_folder) {
-            if (name === 'None') {
-                const pathParts = path.split('/').filter(Boolean);
-                if (pathParts.length > 0) {
-                    name = pathParts.pop();
-                    path = pathParts.join('/');
-                } else {
-                    name = rootFolderName;
-                    path = '';
-                }
-            }
+        if (isTrash) {
+            rootFolder.contents[item.media_name] = {
+                type: 'file',
+                name: item.media_name,
+                modified: formatModifiedDate(item.date),
+                size: formatSize(item.media_size),
+                owner: [],
+                id_message: item.id_message,
+                cluster_id: item.cluster_id,
+                media_type: item.media_type,
+                message_text: item.message_text,
+            };
         } else {
-            if (name === 'None') {
-                return;
-            }
-        }
+            let path = item.locate_media.replace(/^\.\//, '');
+            let name = item.media_name;
 
-        const fullPath = path ? `${path}/${name}` : name;
-        const pathParts = fullPath.split('/').filter(Boolean);
-
-        let currentFolder = rootFolder;
-
-        for (let i = 0; i < pathParts.length; i++) {
-            const part = pathParts[i];
-            const isLastPart = i === pathParts.length - 1;
-
-            if (isLastPart && !item.is_folder) {
-                currentFolder.contents[part] = {
-                    type: 'file',
-                    name: part,
-                    modified: formatModifiedDate(item.date),
-                    size: formatSize(item.media_size),
-                    owner: [],
-                };
-            } else {
-                if (!currentFolder.contents[part]) {
-                    currentFolder.contents[part] = {
-                        type: 'folder',
-                        name: part,
-                        modified: isLastPart ? formatModifiedDate(item.date) : '',
-                        size: '',
-                        owner: [],
-                        contents: {},
-                    };
+            if (item.is_folder) {
+                if (name === 'None') {
+                    const pathParts = path.split('/').filter(Boolean);
+                    if (pathParts.length > 0) {
+                        name = pathParts.pop();
+                        path = pathParts.join('/');
+                    } else {
+                        name = rootFolderName;
+                        path = '';
+                    }
                 }
+            } else {
+                if (name === 'None') {
+                    return;
+                }
+            }
 
-                if (currentFolder.contents[part].type === 'folder') {
-                    currentFolder = currentFolder.contents[part];
+            const fullPath = path ? `${path}/${name}` : name;
+            const pathParts = fullPath.split('/').filter(Boolean);
+
+            let currentFolder = rootFolder;
+
+            for (let i = 0; i < pathParts.length; i++) {
+                const part = pathParts[i];
+                const isLastPart = i === pathParts.length - 1;
+
+                if (isLastPart && !item.is_folder) {
+                    currentFolder.contents[part] = {
+                        type: 'file',
+                        name: part,
+                        modified: formatModifiedDate(item.date),
+                        size: formatSize(item.media_size),
+                        owner: [],
+                        id_message: item.id_message,
+                        cluster_id: item.cluster_id,
+                        media_type: item.media_type,
+                        message_text: item.message_text,
+                    };
                 } else {
-                    console.warn(`Expected a folder at ${part}, but found a file.`);
-                    break;
+                    if (!currentFolder.contents[part]) {
+                        currentFolder.contents[part] = {
+                            type: 'folder',
+                            name: part,
+                            modified: isLastPart ? formatModifiedDate(item.date) : '',
+                            size: '',
+                            owner: [],
+                            contents: {},
+                            id_message: item.id_message,
+                            cluster_id: item.cluster_id,
+                            media_type: item.media_type,
+                            message_text: item.message_text,
+                        };
+                    }
+
+                    if (currentFolder.contents[part].type === 'folder') {
+                        currentFolder = currentFolder.contents[part];
+                    } else {
+                        console.warn(`Expected a folder at ${part}, but found a file.`);
+                        break;
+                    }
                 }
             }
         }
@@ -103,7 +122,7 @@ function buildFileSystem(data, rootFolderName) {
     return rootFolder;
 }
 
-// Funzione helper per ottenere la cartella corrente in base al percorso
+
 function getFolderFromPath(root, path) {
     let currentFolder = root;
     for (let i = 1; i < path.length; i++) {
@@ -129,6 +148,7 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [newName, setNewName] = useState('');
     const hasFetchedInitially = useRef(false);
+    const [refreshFiles, setRefreshFiles] = useState(false);
 
 
     const { token, clusterIdPrivate, clusterIdPublic } = useSession();
@@ -142,70 +162,75 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
     useEffect(() => {
 
         const fetchData = async () => {
-            const url =
-                selectedSection === 'sharedFiles'
-                    ? `${baseUrl["baseUrl"]}/get-all-files-public`
-                    : `${baseUrl["baseUrl"]}/get-all-files`;
+            let url;
 
-            const clusterId = selectedSection === 'sharedFiles' ? clusterIdPublic : clusterIdPrivate;
+            setData([]);
 
-            // Crea una funzione per gestire la richiesta fetch
-            const fetchPromise = fetch(url, {
-                method: 'POST', // Metodo POST
+            if (selectedSection === 'sharedFiles') {
+                url = `${baseUrl["baseUrl"]}/get-all-files-public`;
+            } else if (selectedSection === 'myFiles') {
+                url = `${baseUrl["baseUrl"]}/get-all-files`;
+            } else if (selectedSection === 'trash') {
+                url = `${baseUrl["baseUrl"]}/get-trash-files`;
+            }
+
+            let options = {
+                method: 'POST',
                 headers: {
                     Authorization: `${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ cluster_id: clusterId }),
-            });
+            };
 
-            fetchPromise
+            if (selectedSection === 'trash') {
+                options.method = 'GET';
+            } else {
+                options.body = JSON.stringify({ cluster_id: selectedSection === 'sharedFiles' ? clusterIdPublic : clusterIdPrivate });
+            }
+
+            const fetchPromise = fetch(url, options)
                 .then((response) => {
                     if (response.ok && response.status !== 204) {
                         return response.json();
-                    } else {
-                        throw new Error('Failed to fetch files');
                     }
+                    return response.json().then(error => {
+                        throw new Error(error.message);
+                    });
                 })
                 .then((result) => {
                     if (result && result.status === 'success') {
                         setData(result.data);
-                    } else if (result) {
-                        throw new Error(result.message || 'Failed to fetch files');
+                        return result;
                     }
-                    return result;
-                })
-                .catch((error) => {
-                    console.error(error);
-                    throw error;
+                    throw new Error(result.message);
                 });
 
             toast.promise(fetchPromise, {
                 loading: 'Fetching files...',
-                success: (result) => result.message || 'Files fetched successfully!',
-                error: (error) => error.message || 'Failed to fetch files.',
+                success: (result) => result.message ,
+                error: (error) => error.message ,
             });
+
         };
 
-        // Esegui la funzione solo se non è stata già eseguita al montaggio
         if (!hasFetchedInitially.current && token) {
             fetchData();
-            hasFetchedInitially.current = true; // Segna che la prima esecuzione è stata completata
+            hasFetchedInitially.current = true;
         } else if (token) {
-            // Esegui fetchData solo per cambiamenti in `selectedSection`
             fetchData();
         }
-    }, [selectedSection]); // Assicurati che `token` sia incluso nelle dipendenze
+    }, [selectedSection, refreshFiles]);
 
 
 
 
-    // Build the file system when data changes
+
+
     useEffect(() => {
         setCurrentPath([rootFolderName]);
-        const newFileSystem = buildFileSystem(data, rootFolderName);
+        const newFileSystem = buildFileSystem(data, rootFolderName, selectedSection === 'trash');
         setFileSystem(newFileSystem);
-    }, [data, rootFolderName]);
+    }, [data, rootFolderName, selectedSection]);
 
     const currentFolder = useMemo(() => {
         if (!fileSystem) return null;
@@ -238,12 +263,10 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
     };
 
     const handleRename = () => {
-        // Implementa la logica per rinominare
         handleCloseModal();
     };
 
     const handleDelete = () => {
-        // Implementa la logica per eliminare
         handleCloseModal();
     };
 
@@ -267,6 +290,7 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
                 onFileClick={onFileClick}
                 onFolderClick={handleFolderClick}
                 onOpenModal={handleOpenModal}
+                setRefreshFiles={setRefreshFiles}
             />
             <FileActionsModal
                 open={open}

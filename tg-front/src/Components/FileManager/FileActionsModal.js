@@ -8,6 +8,8 @@ import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
+import Select from '@mui/joy/Select';
+import Option from '@mui/joy/Option';
 
 export default function FileActionsModal({
                                              open,
@@ -20,8 +22,21 @@ export default function FileActionsModal({
                                              newName,
                                              setNewName,
                                              newLocation,
-                                             setNewLocation
+                                             setNewLocation,
+                                             availableLocations
                                          }) {
+
+    const fileName = selectedFile?.name || '';
+    const lastDotIndex = fileName.lastIndexOf('.');
+    const fileExtension = lastDotIndex !== -1 ? fileName.slice(lastDotIndex + 1) : '';
+    const baseName = lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
+
+    const handleRename = () => {
+        const sanitizedNewName = newName.split('.').slice(0, -1).join('.') || newName;
+        const updatedFileName = `${sanitizedNewName}.${fileExtension}`;
+        onRename(updatedFileName);
+    };
+
     return (
         <Modal open={open} onClose={onClose}>
             <ModalDialog>
@@ -29,16 +44,29 @@ export default function FileActionsModal({
                     <>
                         <DialogTitle>Rename File</DialogTitle>
                         <DialogContent>
-                            <form onSubmit={(event) => { event.preventDefault(); onRename(); }}>
+                            <form onSubmit={(event) => {
+                                event.preventDefault();
+                                handleRename();
+                            }}>
                                 <Stack spacing={2}>
                                     <FormControl>
                                         <FormLabel>New Name</FormLabel>
-                                        <Input
-                                            autoFocus
-                                            required
-                                            value={newName}
-                                            onChange={(e) => setNewName(e.target.value)}
-                                        />
+                                        <Stack direction="row" spacing={1}>
+                                            {/* Input per modificare solo il nome del file */}
+                                            <Input
+                                                autoFocus
+                                                required
+                                                value={newName}
+                                                onChange={(e) => setNewName(e.target.value)}
+                                                placeholder={baseName || "Enter new name"}
+                                            />
+                                            {/* Input disabilitato per mostrare l'estensione */}
+                                            <Input
+                                                value={fileExtension ? `.${fileExtension}` : ''}
+                                                disabled
+                                                sx={{ width: 'auto' }}
+                                            />
+                                        </Stack>
                                     </FormControl>
                                     <Button type="submit">Rename</Button>
                                 </Stack>
@@ -71,12 +99,22 @@ export default function FileActionsModal({
                                 <Stack spacing={2}>
                                     <FormControl>
                                         <FormLabel>New Location</FormLabel>
-                                        <Input
+                                        <Select
                                             autoFocus
                                             required
                                             value={newLocation}
-                                            onChange={(e) => setNewLocation(e.target.value)}
-                                        />
+                                            onChange={(e, newValue) => setNewLocation(newValue)}
+                                            placeholder="Select new location"
+                                        >
+                                            {availableLocations
+                                                .filter(location => location.name && location.path)
+                                                .map((location) => (
+                                                    <Option key={location.path} value={location.path}>
+                                                        {location.name}
+                                                    </Option>
+                                                ))
+                                            }
+                                        </Select>
                                     </FormControl>
                                     <Button type="submit">Move</Button>
                                 </Stack>
