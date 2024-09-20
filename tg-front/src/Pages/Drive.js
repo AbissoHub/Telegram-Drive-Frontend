@@ -18,6 +18,8 @@ export default function Drive (baseUrl) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedSection, setSelectedSection] = useState('myFiles');
+    const [progress, setProgress] = React.useState(0);
+    const [isDownloadActive, setIsDownloadActive] = React.useState(false);
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -96,6 +98,7 @@ export default function Drive (baseUrl) {
                         baseUrl={baseUrl}
                         selectedSection={selectedSection}
                         onSectionChange={setSelectedSection}
+                        progress={progress}
                     />
                 </Layout.SideNav>
                 <Layout.Main>
@@ -118,6 +121,10 @@ export default function Drive (baseUrl) {
                                 onFileClick={handleFileClick}
                                 selectedSection={selectedSection}
                                 baseUrl={baseUrl}
+                                setProgress={setProgress}
+                                setIsDownloadActive={setIsDownloadActive}
+                                isDownloadActive={isDownloadActive}
+                                progress={progress}
                             />
                         </Sheet>
                     </Box>

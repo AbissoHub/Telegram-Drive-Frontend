@@ -10,6 +10,7 @@ import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
+import {LinearProgress} from "@mui/joy";
 
 export default function FileActionsModal({
                                              open,
@@ -18,31 +19,57 @@ export default function FileActionsModal({
                                              onRename,
                                              onDelete,
                                              onMove,
+                                             onDownload,
                                              selectedFile,
                                              newName,
                                              setNewName,
                                              newLocation,
                                              setNewLocation,
-                                             availableLocations
+                                             availableLocations,
+                                             folderHandle,
+                                             setFolderHandle,
+                                             setProgress,
+                                             setIsDownloadActive,
+                                             isDownloadActive,
+                                             progress
                                          }) {
-
     const fileName = selectedFile?.name || '';
     const lastDotIndex = fileName.lastIndexOf('.');
     const fileExtension = lastDotIndex !== -1 ? fileName.slice(lastDotIndex + 1) : '';
     const baseName = lastDotIndex !== -1 ? fileName.slice(0, lastDotIndex) : fileName;
 
+    const isValidName = (name) => /^[a-zA-Z0-9\s._-]+$/.test(name);
+
     const handleRename = () => {
-        const sanitizedNewName = newName.split('.').slice(0, -1).join('.') || newName;
-        const updatedFileName = `${sanitizedNewName}.${fileExtension}`;
-        onRename(updatedFileName);
+        if (selectedFile?.type === 'file') {
+            const sanitizedNewName = newName.trim();
+            const updatedFileName = `${sanitizedNewName}.${fileExtension}`;
+            onRename(updatedFileName);
+        } else {
+            onRename(newName.trim());
+        }
     };
+
+    const handleSelectFolder = async () => {
+        if (window.showDirectoryPicker) {
+            try {
+                const handle = await window.showDirectoryPicker();
+                setFolderHandle(handle);
+            } catch (error) {
+                console.error('Error selecting folder :', error);
+            }
+        } else {
+            alert('Your browser doesn\' support folder picker');
+        }
+    };
+
 
     return (
         <Modal open={open} onClose={onClose}>
             <ModalDialog>
                 {modalType === 'rename' && (
                     <>
-                        <DialogTitle>Rename File</DialogTitle>
+                        <DialogTitle>{selectedFile?.type === 'folder' ? 'Rinomina Cartella' : 'Rinomina File'}</DialogTitle>
                         <DialogContent>
                             <form onSubmit={(event) => {
                                 event.preventDefault();
@@ -50,25 +77,27 @@ export default function FileActionsModal({
                             }}>
                                 <Stack spacing={2}>
                                     <FormControl>
-                                        <FormLabel>New Name</FormLabel>
+                                        <FormLabel>Nuovo Nome</FormLabel>
                                         <Stack direction="row" spacing={1}>
-                                            {/* Input per modificare solo il nome del file */}
                                             <Input
                                                 autoFocus
                                                 required
-                                                value={newName}
+                                                value={newName.split(".")[0]}
                                                 onChange={(e) => setNewName(e.target.value)}
-                                                placeholder={baseName || "Enter new name"}
+                                                placeholder={baseName || "Inserisci nuovo nome"}
+                                                error={!isValidName(newName)}
+                                                helperText={!isValidName(newName) ? "Sono consentiti solo caratteri alfanumerici, spazi, underscore, punti e trattini" : ""}
                                             />
-                                            {/* Input disabilitato per mostrare l'estensione */}
-                                            <Input
-                                                value={fileExtension ? `.${fileExtension}` : ''}
-                                                disabled
-                                                sx={{ width: 'auto' }}
-                                            />
+                                            {selectedFile?.type === 'file' && (
+                                                <Input
+                                                    value={fileExtension ? `.${fileExtension}` : ''}
+                                                    disabled
+                                                    sx={{ width: 'auto' }}
+                                                />
+                                            )}
                                         </Stack>
                                     </FormControl>
-                                    <Button type="submit">Rename</Button>
+                                    <Button type="submit" disabled={!isValidName(newName)}>Rinomina</Button>
                                 </Stack>
                             </form>
                         </DialogContent>
@@ -77,34 +106,34 @@ export default function FileActionsModal({
 
                 {modalType === 'delete' && (
                     <>
-                        <DialogTitle>Delete File</DialogTitle>
-                        <DialogContent>Are you sure you want to delete this file?</DialogContent>
+                        <DialogTitle>Elimina {selectedFile?.type === 'folder' ? 'Cartella' : 'File'}</DialogTitle>
+                        <DialogContent>Sei sicuro di voler eliminare questa {selectedFile?.type === 'folder' ? 'cartella' : 'file'}?</DialogContent>
                         <Stack
                             direction="row"
                             spacing={2}
                             justifyContent="flex-end"
                             sx={{ p: 2 }}
                         >
-                            <Button variant="plain" onClick={onClose}>Cancel</Button>
-                            <Button variant="solid" color="danger" onClick={onDelete}>Delete</Button>
+                            <Button variant="plain" onClick={onClose}>Annulla</Button>
+                            <Button variant="solid" color="danger" onClick={onDelete}>Elimina</Button>
                         </Stack>
                     </>
                 )}
 
                 {modalType === 'move' && (
                     <>
-                        <DialogTitle>Move File</DialogTitle>
+                        <DialogTitle>Sposta File</DialogTitle>
                         <DialogContent>
                             <form onSubmit={(event) => { event.preventDefault(); onMove(); }}>
                                 <Stack spacing={2}>
                                     <FormControl>
-                                        <FormLabel>New Location</FormLabel>
+                                        <FormLabel>Nuova Posizione</FormLabel>
                                         <Select
                                             autoFocus
                                             required
                                             value={newLocation}
                                             onChange={(e, newValue) => setNewLocation(newValue)}
-                                            placeholder="Select new location"
+                                            placeholder="Seleziona nuova posizione"
                                         >
                                             {availableLocations
                                                 .filter(location => location.name && location.path)
@@ -116,12 +145,50 @@ export default function FileActionsModal({
                                             }
                                         </Select>
                                     </FormControl>
-                                    <Button type="submit">Move</Button>
+                                    <Button type="submit">Sposta</Button>
                                 </Stack>
                             </form>
                         </DialogContent>
                     </>
                 )}
+
+                {modalType === 'download' && (
+                    <>
+                        <DialogTitle>Download File</DialogTitle>
+                        <DialogContent>
+                            <Stack spacing={2}>
+                                <form onSubmit={(event) => {
+                                    event.preventDefault();
+                                    onDownload();
+                                }}>
+                                    <Stack spacing={2}>
+                                        <FormControl>
+                                            <FormLabel>Nome del file</FormLabel>
+                                            <Stack direction="row" spacing={1}>
+                                                <Input
+                                                    required
+                                                    value={newName}
+                                                    onChange={(e) => setNewName(e.target.value)}
+                                                    placeholder={baseName || "Inserisci il nome del file"}
+                                                    error={!isValidName(newName)}
+                                                    helperText={!isValidName(newName) ? "Sono consentiti solo caratteri alfanumerici, spazi, underscore, punti e trattini" : ""}
+                                                />
+                                            </Stack>
+                                        </FormControl>
+                                        {isDownloadActive && (
+                                            <LinearProgress variant="determinate" value={progress} />
+                                        )}
+                                        <Button type="submit" disabled={!isValidName(newName) || isDownloadActive}>
+                                            {isDownloadActive ? `Download in corso: ${progress}%` : "Download"}
+                                        </Button>
+                                    </Stack>
+                                </form>
+                            </Stack>
+                        </DialogContent>
+                    </>
+                )}
+
+
             </ModalDialog>
         </Modal>
     );

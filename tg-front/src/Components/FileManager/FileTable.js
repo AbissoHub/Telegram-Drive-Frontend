@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 const StyledTh = styled('th')({});
 const StyledTd = styled('td')({});
 
-export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, setRefreshFiles }) {
+export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, setRefreshFiles, setProgress, setIsDownloadActive, isDownloadActive,progress }) {
     const [openModal, setOpenModal] = React.useState(false);
     const [modalType, setModalType] = React.useState('');
     const [selectedFile, setSelectedFile] = React.useState(null);
@@ -26,12 +26,16 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
     const [newLocation, setNewLocation] = React.useState('');
     const [availableLocations, setAvailableLocations] = React.useState([]);
     const [loadingLocations, setLoadingLocations] = React.useState(false);
+
     const { token } = useSession();
+
+    const [folderHandle, setFolderHandle] = React.useState(null);
 
     const handleOpenModal = (type, file) => {
         setModalType(type);
         setSelectedFile(file);
         setOpenModal(true);
+        setNewName(file.name); // Imposta il nome del file corrente nel modal
 
         if (type === 'move') {
             fetchFolders(file.cluster_id);
@@ -44,6 +48,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         setSelectedFile(null);
         setNewName('');
         setNewLocation('');
+        setFolderHandle(null); // Resetta l'handle della cartella
     };
 
     const fetchFolders = async (clusterId) => {
@@ -63,11 +68,16 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             const data = await response.json();
 
             if (data.status === 'success') {
-                setAvailableLocations(data.data.map(folder => ({
-                    name: folder.locate_media,
-                    path: folder.locate_media,
-                })));
-                //console.log(availableLocations)
+                const locations = [
+                    { name: './', path: './' },
+                    ...data.data.map(folder => ({
+                        name: folder.locate_media,
+                        path: folder.locate_media,
+                    }))
+                ];
+
+                setAvailableLocations(locations);
+
             } else {
                 throw new Error(data.message || 'Failed to fetch folders');
             }
@@ -82,6 +92,47 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
     const handleRename = (name_change) => {
         if (!selectedFile) return;
 
+        if (selectedFile.type === 'folder') {
+            handleRenameFolder(name_change);
+        } else {
+            handleRenameFile(name_change);
+        }
+    };
+
+    const handleRenameFolder = (new_folder_path) => {
+        let options = {
+            method: 'POST',
+            headers: {
+                Authorization: `${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                c: selectedFile.cluster_id,
+                old_path_folder: selectedFile.locate_media,
+                new_name: new_folder_path,
+            }),
+        };
+
+        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/rename-folder`, options)
+            .then((response) => response.json())
+            .catch((error) => {
+                console.error("Error during rename:", error);
+                throw error;
+            });
+
+        toast.promise(fetchPromise, {
+            loading: 'Renaming folder...',
+            success: (result) => {
+                setRefreshFiles((prev) => !prev);
+                return result.message;
+            },
+            error: (error) => error.message || 'Failed to rename folder.',
+        });
+
+        fetchPromise.finally(handleCloseModal);
+    };
+
+    const handleRenameFile = (name_change) => {
         let options = {
             method: 'POST',
             headers: {
@@ -96,21 +147,9 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         };
 
         const fetchPromise = fetch(`${baseUrl["baseUrl"]}/rename-file`, options)
-            .then((response) => {
-                if (response.ok && response.status !== 204) {
-                    return response.json();
-                }
-                return response.json().then((error) => {
-                    throw new Error(error.message || 'Rename failed');
-                });
-            })
-            .then((result) => {
-                if (result && result.status === 'success') {
-                    return result;
-                }
-                throw new Error(result.message);
-            })
+            .then((response) => response.json())
             .catch((error) => {
+                console.error("Error during rename:", error);
                 throw error;
             });
 
@@ -129,6 +168,46 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
     const handleDelete = () => {
         if (!selectedFile) return;
 
+        if (selectedFile.type === 'folder') {
+            handleDeleteFolder();
+        } else {
+            handleDeleteFile();
+        }
+    };
+
+    const handleDeleteFolder = () => {
+        let options = {
+            method: 'POST',
+            headers: {
+                Authorization: `${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                c: selectedFile.cluster_id,
+                folder_id: selectedFile.id_message,
+            }),
+        };
+
+        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/delete-folder`, options)
+            .then((response) => response.json())
+            .catch((error) => {
+                console.error("Error during delete:", error);
+                throw error;
+            });
+
+        toast.promise(fetchPromise, {
+            loading: 'Deleting folder...',
+            success: (result) => {
+                setRefreshFiles((prev) => !prev);
+                return result.message;
+            },
+            error: (error) => error.message || 'Failed to delete folder.',
+        });
+
+        fetchPromise.finally(handleCloseModal);
+    };
+
+    const handleDeleteFile = () => {
         let options = {
             method: 'POST',
             headers: {
@@ -142,21 +221,9 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         };
 
         const fetchPromise = fetch(`${baseUrl["baseUrl"]}/delete-file`, options)
-            .then((response) => {
-                if (response.ok && response.status !== 204) {
-                    return response.json();
-                }
-                return response.json().then((error) => {
-                    throw new Error(error.message || 'Delete failed');
-                });
-            })
-            .then((result) => {
-                if (result && result.status === 'success') {
-                    return result;
-                }
-                throw new Error(result.message || 'Delete failed');
-            })
+            .then((response) => response.json())
             .catch((error) => {
+                console.error("Error during delete:", error);
                 throw error;
             });
 
@@ -196,7 +263,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             });
 
         toast.promise(fetchPromise, {
-            loading: 'Deleting file...',
+            loading: 'Moving file...',
             success: (result) => {
                 setRefreshFiles((prev) => !prev);
                 return result.message;
@@ -207,35 +274,99 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         fetchPromise.finally(handleCloseModal);
     };
 
-    // Funzione per scaricare un file
-    const handleDownload = (file) => {
-        let options = {
+    const handleDownload = async () => {
+        if (isDownloadActive) {
+            toast.error('There is another active download to be completed');
+            return;
+        }
+
+        if (!selectedFile) {
+            toast.error('Per favore, seleziona un file da scaricare.');
+            return;
+        }
+
+        setIsDownloadActive(true);
+        setProgress(0); // Reset della barra di progresso
+
+        const options = {
             method: 'POST',
             headers: {
-                Authorization: `${token}`,
+                'Authorization': `${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                cluster_id: 'cluster_id_placeholder',
-                file_id: file.id,
-                dest: 'destination_placeholder',
-                name_file: file.name,
+                cluster_id: selectedFile.cluster_id,
+                file_id: selectedFile.id_message,
+                name_file: newName,
             }),
         };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/download, options`)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during download:", error);
-                throw error;
-            });
+        try {
+            const response = await fetch(`${baseUrl["baseUrl"]}/download`, options);
 
-        toast.promise(fetchPromise, {
-            loading: 'Downloading file...',
-            success: (result) => result.message || 'File downloaded successfully!',
-            error: (error) => error.message || 'Failed to download file.',
-        });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Il server ha risposto con status ${response.status}`);
+            }
+
+            let filename = newName;
+            const disposition = response.headers.get('Content-Disposition');
+            if (disposition && disposition.includes('filename=')) {
+                const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1];
+                }
+            }
+
+            const contentLength = response.headers.get('Content-Length');
+            const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+            if (!response.body) {
+                throw new Error('ReadableStream non supportato in questa risposta.');
+            }
+
+            const reader = response.body.getReader();
+            const chunks = [];
+            let received = 0;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                received += value.length;
+                if (total) {
+                    const percentage = ((received / total) * 100).toFixed(2);
+                    setProgress(parseInt(percentage, 10));
+                }
+            }
+
+            const blob = new Blob(chunks);
+            const url = window.URL.createObjectURL(blob);
+
+            // Crea un elemento <a> temporaneo
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+
+            // Rimuove l'elemento <a> e revoca l'URL oggetto
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            setProgress(100);
+            setIsDownloadActive(false);
+            toast.success(`File '${filename}' scaricato con successo!`);
+            handleCloseModal();
+        } catch (error) {
+            setIsDownloadActive(false);
+            console.error("Errore durante il download:", error);
+            toast.error(error.message);
+        }
     };
+
+
+
 
     return (
         <>
@@ -243,18 +374,18 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                 <thead>
                 <tr>
                     <StyledTh>
-                        <Typography level="title-sm">Name</Typography>
+                        <Typography level="title-sm">Nome</Typography>
                     </StyledTh>
                     <StyledTh sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <Typography level="title-sm" endDecorator={<ArrowDropDownRoundedIcon />}>
-                            Last modified
+                            Ultima modifica
                         </Typography>
                     </StyledTh>
                     <StyledTh sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                        <Typography level="title-sm">Size</Typography>
+                        <Typography level="title-sm">Dimensione</Typography>
                     </StyledTh>
                     <StyledTh>
-                        <Typography level="title-sm">Actions</Typography>
+                        <Typography level="title-sm">Azioni</Typography>
                     </StyledTh>
                 </tr>
                 </thead>
@@ -303,7 +434,8 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                                             aria-label="Download"
                                             onClick={(event) => {
                                                 event.stopPropagation();
-                                                handleDownload(file);
+                                                event.preventDefault();
+                                                handleOpenModal('download', file);
                                             }}
                                         >
                                             <DownloadRoundedIcon />
@@ -365,8 +497,15 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                 setNewName={setNewName}
                 newLocation={newLocation}
                 setNewLocation={setNewLocation}
-                availableLocations={availableLocations}  // Passa le cartelle disponibili al modal
-                loading={loadingLocations}  // Stato di caricamento
+                availableLocations={availableLocations}
+                loading={loadingLocations}
+                onDownload={handleDownload}
+                folderHandle={folderHandle}
+                setFolderHandle={setFolderHandle}
+                setProgress={setProgress}
+                setIsDownloadActive={setIsDownloadActive}
+                isDownloadActive={isDownloadActive}
+                progress={progress}
             />
         </>
     );

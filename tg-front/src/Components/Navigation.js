@@ -11,6 +11,7 @@ import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import UploadButton from "./UploadButton.js";
 import SyncButton from "./SyncButton";
+import CreateFolderButton from "./CreateFolderButton";
 
 export default function Navigation({ baseUrl, selectedSection, onSectionChange = () => {} }) {
   return (
@@ -67,11 +68,28 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
               sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
             <ListItem>
+              <CreateFolderButton baseUrl={baseUrl} />
+            </ListItem>
+            <ListItem>
               <UploadButton />
             </ListItem>
             <ListItem>
               <SyncButton baseUrl={baseUrl} />
             </ListItem>
+          </List>
+        </ListItem>
+        <ListItem nested>
+          <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
+            Tasks queue
+          </ListSubheader>
+          <List
+              aria-labelledby="nav-list-browse"
+              sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
+          >
+            <ListItem>
+              <CreateFolderButton baseUrl={baseUrl} />
+            </ListItem>
+
           </List>
         </ListItem>
 

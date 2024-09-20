@@ -56,7 +56,7 @@ const Login = ({ baseUrl }) => {
         toast.promise(loginPromise, {
             loading: 'Logging in...',
             success: 'Logged in successfully!',
-            error: 'Login failed. Please check your credentials.',
+            error: 'Please check your credentials or server status',
         });
     };
 

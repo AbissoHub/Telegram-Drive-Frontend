@@ -26,7 +26,6 @@ function formatSize(sizeInMB) {
         return (sizeInMB * 1024).toFixed(1) + 'KB';
     }
 }
-
 function buildFileSystem(data, rootFolderName, isTrash = false) {
     const rootFolder = {
         type: 'folder',
@@ -34,6 +33,7 @@ function buildFileSystem(data, rootFolderName, isTrash = false) {
         modified: '',
         size: '',
         owner: [],
+        locate_media: '',
         contents: {},
     };
 
@@ -87,6 +87,7 @@ function buildFileSystem(data, rootFolderName, isTrash = false) {
                         modified: formatModifiedDate(item.date),
                         size: formatSize(item.media_size),
                         owner: [],
+                        locate_media: item.locate_media,
                         id_message: item.id_message,
                         cluster_id: item.cluster_id,
                         media_type: item.media_type,
@@ -100,6 +101,7 @@ function buildFileSystem(data, rootFolderName, isTrash = false) {
                             modified: isLastPart ? formatModifiedDate(item.date) : '',
                             size: '',
                             owner: [],
+                            locate_media: item.locate_media,
                             contents: {},
                             id_message: item.id_message,
                             cluster_id: item.cluster_id,
@@ -123,6 +125,7 @@ function buildFileSystem(data, rootFolderName, isTrash = false) {
 }
 
 
+
 function getFolderFromPath(root, path) {
     let currentFolder = root;
     for (let i = 1; i < path.length; i++) {
@@ -139,7 +142,7 @@ function getFolderFromPath(root, path) {
     return currentFolder;
 }
 
-export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
+export default function FileManager({ onFileClick, selectedSection, baseUrl, setProgress, setIsDownloadActive, isDownloadActive }) {
     const [data, setData] = useState([]);
     const [fileSystem, setFileSystem] = useState(null);
     const [currentPath, setCurrentPath] = useState([]);
@@ -291,6 +294,9 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl }) {
                 onFolderClick={handleFolderClick}
                 onOpenModal={handleOpenModal}
                 setRefreshFiles={setRefreshFiles}
+                setProgress={setProgress}
+                setIsDownloadActive={setIsDownloadActive}
+                isDownloadActive={isDownloadActive}
             />
             <FileActionsModal
                 open={open}
