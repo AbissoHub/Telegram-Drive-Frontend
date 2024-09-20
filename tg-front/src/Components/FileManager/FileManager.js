@@ -142,7 +142,7 @@ function getFolderFromPath(root, path) {
     return currentFolder;
 }
 
-export default function FileManager({ onFileClick, selectedSection, baseUrl, setProgress, setIsDownloadActive, isDownloadActive }) {
+export default function FileManager({ onFileClick, selectedSection, baseUrl, setProgress, setIsDownloadActive, isDownloadActive, refreshFiles, setRefreshFiles }) {
     const [data, setData] = useState([]);
     const [fileSystem, setFileSystem] = useState(null);
     const [currentPath, setCurrentPath] = useState([]);
@@ -151,7 +151,6 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl, set
     const [selectedFile, setSelectedFile] = useState(null);
     const [newName, setNewName] = useState('');
     const hasFetchedInitially = useRef(false);
-    const [refreshFiles, setRefreshFiles] = useState(false);
 
 
     const { token, clusterIdPrivate, clusterIdPublic } = useSession();

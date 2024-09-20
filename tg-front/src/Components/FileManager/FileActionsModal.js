@@ -6,11 +6,9 @@ import DialogContent from '@mui/joy/DialogContent';
 import Stack from '@mui/joy/Stack';
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
-import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
-import Select from '@mui/joy/Select';
-import Option from '@mui/joy/Option';
-import {LinearProgress} from "@mui/joy";
+import {Input, Select, Option, CircularProgress } from "@mui/joy";
+
 
 export default function FileActionsModal({
                                              open,
@@ -26,12 +24,10 @@ export default function FileActionsModal({
                                              newLocation,
                                              setNewLocation,
                                              availableLocations,
-                                             folderHandle,
                                              setFolderHandle,
-                                             setProgress,
-                                             setIsDownloadActive,
                                              isDownloadActive,
-                                             progress
+                                             progress,
+                                             loadingLocations
                                          }) {
     const fileName = selectedFile?.name || '';
     const lastDotIndex = fileName.lastIndexOf('.');
@@ -47,19 +43,6 @@ export default function FileActionsModal({
             onRename(updatedFileName);
         } else {
             onRename(newName.trim());
-        }
-    };
-
-    const handleSelectFolder = async () => {
-        if (window.showDirectoryPicker) {
-            try {
-                const handle = await window.showDirectoryPicker();
-                setFolderHandle(handle);
-            } catch (error) {
-                console.error('Error selecting folder :', error);
-            }
-        } else {
-            alert('Your browser doesn\' support folder picker');
         }
     };
 
@@ -133,7 +116,10 @@ export default function FileActionsModal({
                                             required
                                             value={newLocation}
                                             onChange={(e, newValue) => setNewLocation(newValue)}
-                                            placeholder="Seleziona nuova posizione"
+                                            placeholder={loadingLocations ? 'Caricamento posizioni...' : 'Seleziona nuova posizione'}
+                                            sx={{ mb: 2 }}
+                                            disabled={loadingLocations || availableLocations.length === 0}
+                                            startDecorator={loadingLocations && <CircularProgress size="sm" />}
                                         >
                                             {availableLocations
                                                 .filter(location => location.name && location.path)
@@ -145,12 +131,15 @@ export default function FileActionsModal({
                                             }
                                         </Select>
                                     </FormControl>
-                                    <Button type="submit">Sposta</Button>
+                                    <Button type="submit" disabled={loadingLocations}>
+                                        Sposta
+                                    </Button>
                                 </Stack>
                             </form>
                         </DialogContent>
                     </>
                 )}
+
 
                 {modalType === 'download' && (
                     <>
@@ -175,9 +164,6 @@ export default function FileActionsModal({
                                                 />
                                             </Stack>
                                         </FormControl>
-                                        {isDownloadActive && (
-                                            <LinearProgress variant="determinate" value={progress} />
-                                        )}
                                         <Button type="submit" disabled={!isValidName(newName) || isDownloadActive}>
                                             {isDownloadActive ? `Download in corso: ${progress}%` : "Download"}
                                         </Button>

@@ -12,10 +12,12 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import UploadButton from "./UploadButton.js";
 import SyncButton from "./SyncButton";
 import CreateFolderButton from "./CreateFolderButton";
+import { LinearProgress, Typography, Box } from '@mui/joy';
 
-export default function Navigation({ baseUrl, selectedSection, onSectionChange = () => {} }) {
+
+export default function Navigation({ baseUrl, selectedSection, onSectionChange = () => {}, isDownloadActive, progress, setRefreshFiles }) {
   return (
-      <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px' }}>
+      <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px', width: '250px' }}>
         <ListItem nested>
           <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
             Browse
@@ -64,17 +66,17 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
             Actions
           </ListSubheader>
           <List
-              aria-labelledby="nav-list-browse"
+              aria-labelledby="nav-list-actions"
               sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
             <ListItem>
-              <CreateFolderButton baseUrl={baseUrl} />
+              <CreateFolderButton baseUrl={baseUrl} setRefreshFiles={setRefreshFiles} />
             </ListItem>
             <ListItem>
-              <UploadButton />
+              <UploadButton baseUrl={baseUrl} setRefreshFiles={setRefreshFiles} />
             </ListItem>
             <ListItem>
-              <SyncButton baseUrl={baseUrl} />
+              <SyncButton baseUrl={baseUrl} setRefreshFiles={setRefreshFiles} />
             </ListItem>
           </List>
         </ListItem>
@@ -83,17 +85,22 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
             Tasks queue
           </ListSubheader>
           <List
-              aria-labelledby="nav-list-browse"
+              aria-labelledby="nav-list-tasks"
               sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
-            <ListItem>
-              <CreateFolderButton baseUrl={baseUrl} />
-            </ListItem>
+            {isDownloadActive && (
+                <ListItem>
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Download in corso: {progress}%
+                    </Typography>
+                    <LinearProgress variant="determinate" value={progress} />
+                  </Box>
+                </ListItem>
+            )}
 
           </List>
         </ListItem>
-
-
       </List>
   );
 }

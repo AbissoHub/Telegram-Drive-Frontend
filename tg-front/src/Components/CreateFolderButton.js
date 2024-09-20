@@ -3,47 +3,171 @@ import Button from '@mui/joy/Button';
 import Modal from '@mui/joy/Modal';
 import Box from '@mui/joy/Box';
 import { styled } from '@mui/joy/styles';
-import { Typography, Input, Select, Option } from "@mui/joy";
+import { Typography, Input, Select, Option, CircularProgress } from "@mui/joy";
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import { toast } from "sonner";
+import { useSession } from './SessionContext';
 
-// Componente styled per l'input nascosto
-const VisuallyHiddenInput = styled('input')`
-  display: none;
-`;
-
-const CreateFolderButton = () => {
+const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
     const [open, setOpen] = useState(false);
     const [folderName, setFolderName] = useState('');
     const [selectedDrive, setSelectedDrive] = useState('');
     const [selectedSubfolder, setSelectedSubfolder] = useState('');
+    const [availableDrives, setAvailableDrives] = useState([]);
+    const [availableSubfolders, setAvailableSubfolders] = useState([]);
+    const [loadingDrives, setLoadingDrives] = useState(false);
+    const [loadingSubfolders, setLoadingSubfolders] = useState(false);
+    const { token } = useSession();
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleOpen = () => {
+        setOpen(true);
+        fetchClustersInfo();
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setFolderName('');
+        setSelectedDrive('');
+        setSelectedSubfolder('');
+        setAvailableSubfolders([]);
+    };
 
     const handleFolderNameChange = (event) => {
-        setFolderName(event.target.value);
+        const value = event.target.value;
+        const regex = /^[a-zA-Z0-9 _-]*$/;
+        if (regex.test(value)) {
+            setFolderName(value);
+        } else {
+            toast.error('Sono consentiti solo caratteri alfanumerici, spazi, trattini e underscore.');
+        }
     };
 
     const handleDriveChange = (event, newValue) => {
         if (newValue) {
             setSelectedDrive(newValue);
+            fetchFolders(newValue);
+        } else {
+            setSelectedDrive('');
+            setAvailableSubfolders([]);
+            setSelectedSubfolder('');
         }
     };
 
     const handleSubfolderChange = (event, newValue) => {
         if (newValue) {
             setSelectedSubfolder(newValue);
+        } else {
+            setSelectedSubfolder('');
         }
     };
 
-    const handleCreateFolder = () => {
-        if (folderName && selectedDrive && selectedSubfolder) {
-            alert(`The folder "${folderName}" will be created in ${selectedDrive}/${selectedSubfolder}.`);
-            handleClose();
-        } else {
-            alert('Please fill out all fields.');
+
+    const fetchClustersInfo = async () => {
+        setLoadingDrives(true);
+        try {
+            const response = await fetch(`${baseUrl["baseUrl"]}/get-clusters-info`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                const privateKey = Object.keys(data.data).find(key => key.includes('Private'));
+                const sharedKey = Object.keys(data.data).find(key => key.includes('Shared'));
+
+                const privateKeyValue = privateKey ? data.data[privateKey] : null;
+                const sharedKeyValue = sharedKey ? data.data[sharedKey] : null;
+
+                const formattedDrives = [];
+
+                if (privateKeyValue) {
+                    formattedDrives.push({ name: 'My Files', value: privateKeyValue });
+                }
+
+                if (sharedKeyValue) {
+                    formattedDrives.push({ name: 'Shared Files', value: sharedKeyValue });
+                }
+
+                setAvailableDrives(formattedDrives);
+            } else {
+                throw new Error(data.message || 'Failed to fetch drives');
+            }
+        } catch (error) {
+            toast.error(error.message || 'Failed to fetch drives');
+        } finally {
+            setLoadingDrives(false);
         }
     };
+
+
+    const fetchFolders = async (driveId) => {
+        setLoadingSubfolders(true);
+        try {
+            const response = await fetch(`${baseUrl["baseUrl"]}/get-folders`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: parseInt(driveId),
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                const locations = [
+                    { name: './', path: './' },
+                    ...data.data.map(folder => ({
+                        name: folder.locate_media,
+                        path: folder.locate_media,
+                    }))
+                ];
+
+                setAvailableSubfolders(locations);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setLoadingSubfolders(false);
+        }
+    };
+
+    const createFolder = async () => {
+        try {
+            const response = await fetch(`${baseUrl["baseUrl"]}/create-folder`, {
+                method: 'POST',
+                headers: {
+                    Authorization: token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: parseInt(selectedDrive),
+                    folder_path: `${selectedSubfolder}/${folderName}`
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.status !== 'success') {
+                throw new Error(data.message);
+            }
+
+            toast.success(data.message);
+            handleClose();
+            setRefreshFiles((prev) => !prev);
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
 
     return (
         <>
@@ -62,7 +186,7 @@ const CreateFolderButton = () => {
                     },
                 }}
                 startDecorator={
-                    <CreateNewFolderIcon/>
+                    <CreateNewFolderIcon />
                 }
             >
                 Create Folder
@@ -88,35 +212,49 @@ const CreateFolderButton = () => {
                         value={folderName}
                         onChange={handleFolderNameChange}
                         sx={{ mb: 2 }}
+                        required
                     />
 
                     <Select
-                        placeholder="Select Drive"
+                        placeholder={loadingDrives ? 'Loading drives...' : 'Select Drive'}
                         onChange={handleDriveChange}
                         sx={{ mb: 2 }}
                         value={selectedDrive}
+                        disabled={loadingDrives || availableDrives.length === 0}
+                        startDecorator={loadingDrives && <CircularProgress size="sm" />}
                     >
-                        <Option value="Drive A">Drive A</Option>
-                        <Option value="Drive B">Drive B</Option>
-                        <Option value="Drive C">Drive C</Option>
+                        {availableDrives.map((drive) => (
+                            <Option key={drive.value} value={drive.value}>
+                                {drive.name}
+                            </Option>
+                        ))}
                     </Select>
 
                     <Select
-                        placeholder="Select Subfolder"
+                        placeholder={loadingSubfolders ? 'Loading subfolders...' : 'Select Subfolder'}
                         onChange={handleSubfolderChange}
                         sx={{ mb: 2 }}
                         value={selectedSubfolder}
+                        disabled={!selectedDrive || loadingSubfolders || availableSubfolders.length === 0}
+                        startDecorator={loadingSubfolders && <CircularProgress size="sm" />}
                     >
-                        <Option value="Subfolder 1">Subfolder 1</Option>
-                        <Option value="Subfolder 2">Subfolder 2</Option>
-                        <Option value="Subfolder 3">Subfolder 3</Option>
+                        {availableSubfolders.map((subfolder, index) => (
+                            <Option key={index} value={subfolder.path}>
+                                {subfolder.name}
+                            </Option>
+                        ))}
                     </Select>
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Button onClick={handleClose} variant="outlined" color="danger">
                             Cancel
                         </Button>
-                        <Button onClick={handleCreateFolder} variant="solid" color="success">
+                        <Button
+                            onClick={createFolder}
+                            variant="solid"
+                            color="success"
+                            disabled={!folderName || !selectedDrive || !selectedSubfolder}
+                        >
                             Create
                         </Button>
                     </Box>

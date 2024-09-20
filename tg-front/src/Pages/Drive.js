@@ -14,12 +14,16 @@ import Header from '../Components/Header';
 import TableFiles from '../Components/FileManager/FileManager';
 import FileDetails from '../Components/FileDetails';
 
+
 export default function Drive (baseUrl) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedSection, setSelectedSection] = useState('myFiles');
     const [progress, setProgress] = React.useState(0);
     const [isDownloadActive, setIsDownloadActive] = React.useState(false);
+
+    const [refreshFiles, setRefreshFiles] = useState(false);
+
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -98,7 +102,9 @@ export default function Drive (baseUrl) {
                         baseUrl={baseUrl}
                         selectedSection={selectedSection}
                         onSectionChange={setSelectedSection}
+                        isDownloadActive={isDownloadActive}
                         progress={progress}
+                        setRefreshFiles={setRefreshFiles}
                     />
                 </Layout.SideNav>
                 <Layout.Main>
@@ -125,6 +131,8 @@ export default function Drive (baseUrl) {
                                 setIsDownloadActive={setIsDownloadActive}
                                 isDownloadActive={isDownloadActive}
                                 progress={progress}
+                                refreshFiles={refreshFiles}
+                                setRefreshFiles={setRefreshFiles}
                             />
                         </Sheet>
                     </Box>

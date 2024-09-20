@@ -48,7 +48,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         setSelectedFile(null);
         setNewName('');
         setNewLocation('');
-        setFolderHandle(null); // Resetta l'handle della cartella
+        setFolderHandle(null);
     };
 
     const fetchFolders = async (clusterId) => {
@@ -184,7 +184,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             },
             body: JSON.stringify({
                 c: selectedFile.cluster_id,
-                folder_id: selectedFile.id_message,
+                folder_path: selectedFile.locate_media,
             }),
         };
 
@@ -286,7 +286,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         }
 
         setIsDownloadActive(true);
-        setProgress(0); // Reset della barra di progresso
+        setProgress(0);
 
         const options = {
             method: 'POST',
@@ -300,6 +300,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                 name_file: newName,
             }),
         };
+        handleCloseModal();
 
         try {
             const response = await fetch(`${baseUrl["baseUrl"]}/download`, options);
@@ -324,6 +325,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             if (!response.body) {
                 throw new Error('ReadableStream non supportato in questa risposta.');
             }
+
 
             const reader = response.body.getReader();
             const chunks = [];
@@ -357,10 +359,8 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             setProgress(100);
             setIsDownloadActive(false);
             toast.success(`File '${filename}' scaricato con successo!`);
-            handleCloseModal();
         } catch (error) {
             setIsDownloadActive(false);
-            console.error("Errore durante il download:", error);
             toast.error(error.message);
         }
     };
@@ -498,7 +498,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                 newLocation={newLocation}
                 setNewLocation={setNewLocation}
                 availableLocations={availableLocations}
-                loading={loadingLocations}
+                loadingLocations={loadingLocations}
                 onDownload={handleDownload}
                 folderHandle={folderHandle}
                 setFolderHandle={setFolderHandle}
