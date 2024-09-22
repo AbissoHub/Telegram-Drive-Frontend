@@ -142,13 +142,20 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
     const uploadFile = async () => {
         if (selectedFile && selectedDrive && selectedSubfolder) {
 
+            const fileSize = selectedFile.size;
+
+            const destination = `${selectedDrive}/${selectedSubfolder}`;
+
+            const clusterId = 'IL_TUO_CLUSTER_ID';
+
             const formData = new FormData();
             formData.append('file', selectedFile);
-            formData.append('drive', selectedDrive);
-            formData.append('path', selectedSubfolder);
+            formData.append('destination', destination);
+            formData.append('c', clusterId);
+            formData.append('file_size', fileSize.toString());
 
             try {
-                const response = await fetch(`${baseUrl["baseUrl"]}/upload-file`, {
+                const response = await fetch(`${baseUrl["baseUrl"]}/upload`, {
                     method: 'POST',
                     headers: {
                         Authorization: `${token}`,
@@ -174,6 +181,7 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
             toast.error('Per favore, seleziona un file, un drive e una destinazione.');
         }
     };
+
 
     return (
         <>

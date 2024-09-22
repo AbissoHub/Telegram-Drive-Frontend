@@ -142,6 +142,8 @@ const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
 
     const createFolder = async () => {
         try {
+            const folderPath = selectedSubfolder === './' ? `${selectedSubfolder}${folderName}` : `${selectedSubfolder}/${folderName}`;
+
             const response = await fetch(`${baseUrl["baseUrl"]}/create-folder`, {
                 method: 'POST',
                 headers: {
@@ -150,7 +152,7 @@ const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
                 },
                 body: JSON.stringify({
                     c: parseInt(selectedDrive),
-                    folder_path: `${selectedSubfolder}/${folderName}`
+                    folder_path: folderPath
                 }),
             });
 
@@ -167,6 +169,7 @@ const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
             toast.error(error.message);
         }
     };
+
 
 
     return (
