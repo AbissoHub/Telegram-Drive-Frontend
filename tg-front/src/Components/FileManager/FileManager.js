@@ -162,7 +162,6 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl, set
                 : 'Trash';
 
     useEffect(() => {
-
         const fetchData = async () => {
             let url;
 
@@ -187,32 +186,30 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl, set
             if (selectedSection === 'trash') {
                 options.method = 'GET';
             } else {
-                options.body = JSON.stringify({ cluster_id: selectedSection === 'sharedFiles' ? clusterIdPublic : clusterIdPrivate });
+                options.body = JSON.stringify({
+                    cluster_id: selectedSection === 'sharedFiles' ? clusterIdPublic : clusterIdPrivate
+                });
             }
 
-            const fetchPromise = fetch(url, options)
-                .then((response) => {
-                    if (response.ok && response.status !== 204) {
-                        return response.json();
-                    }
-                    return response.json().then(error => {
-                        throw new Error(error.message);
-                    });
-                })
-                .then((result) => {
+            try {
+                const response = await fetch(url, options);
+
+                if (response.ok && response.status !== 204) {
+                    const result = await response.json();
+
                     if (result && result.status === 'success') {
                         setData(result.data);
-                        return result;
+                    } else {
+                        throw new Error(result.message || 'Failed to fetch files.');
                     }
-                    throw new Error(result.message);
-                });
-
-            toast.promise(fetchPromise, {
-                loading: 'Fetching files...',
-                success: (result) => result.message ,
-                error: (error) => error.message ,
-            });
-
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch files.');
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                toast.error(error.message || 'An error occurred while fetching files.');
+            }
         };
 
         if (!hasFetchedInitially.current && token) {
@@ -222,8 +219,6 @@ export default function FileManager({ onFileClick, selectedSection, baseUrl, set
             fetchData();
         }
     }, [selectedSection, refreshFiles]);
-
-
 
 
 

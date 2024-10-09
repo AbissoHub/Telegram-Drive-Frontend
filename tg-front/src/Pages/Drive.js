@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
 import Sheet from '@mui/joy/Sheet';
-import Stack from '@mui/joy/Stack';
-
-import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
 import Layout from '../Components/Layout';
 import Navigation from '../Components/Navigation';
@@ -14,16 +10,13 @@ import Header from '../Components/Header';
 import TableFiles from '../Components/FileManager/FileManager';
 import FileDetails from '../Components/FileDetails';
 
-
-export default function Drive (baseUrl) {
+export default function Drive(baseUrl) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedSection, setSelectedSection] = useState('myFiles');
-    const [progress, setProgress] = React.useState(0);
-    const [isDownloadActive, setIsDownloadActive] = React.useState(false);
-
+    const [progress, setProgress] = useState(0);
+    const [isDownloadActive, setIsDownloadActive] = useState(false);
     const [refreshFiles, setRefreshFiles] = useState(false);
-
 
     const handleFileClick = (file) => {
         setSelectedFile(file);
@@ -31,6 +24,15 @@ export default function Drive (baseUrl) {
 
     const handleCloseDetails = () => {
         setSelectedFile(null);
+    };
+
+    const handleOpenDrawer = () => {
+        setDrawerOpen(true);
+    };
+
+    const handleSectionChange = (section) => {
+        setSelectedSection(section);
+        setDrawerOpen(false);
     };
 
     return (
@@ -41,39 +43,14 @@ export default function Drive (baseUrl) {
                     <Navigation
                         baseUrl={baseUrl}
                         selectedSection={selectedSection}
-                        onSectionChange={setSelectedSection}
+                        onSectionChange={handleSectionChange}
+                        isDownloadActive={isDownloadActive}
+                        progress={progress}
+                        setRefreshFiles={setRefreshFiles}
                     />
                 </Layout.SideDrawer>
             )}
 
-            <Stack
-                id="tab-bar"
-                direction="row"
-                spacing={1}
-                sx={{
-                    justifyContent: 'space-around',
-                    display: { xs: 'flex', sm: 'none' },
-                    zIndex: '999',
-                    bottom: 0,
-                    position: 'fixed',
-                    width: '100dvw',
-                    py: 2,
-                    backgroundColor: 'background.body',
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                }}
-            >
-                <Button
-                    variant="plain"
-                    color="neutral"
-                    size="sm"
-                    startDecorator={<FolderRoundedIcon />}
-                    sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-                    onClick={() => setDrawerOpen(true)}
-                >
-                    Files
-                </Button>
-            </Stack>
             <Layout.Root
                 sx={[
                     {
@@ -91,7 +68,7 @@ export default function Drive (baseUrl) {
                 ]}
             >
                 <Layout.Header>
-                    <Header baseUrl={baseUrl} />
+                    <Header baseUrl={baseUrl} onOpenDrawer={handleOpenDrawer} /> {/* Pass handleOpenDrawer */}
                 </Layout.Header>
                 <Layout.SideNav
                     sx={{
@@ -101,10 +78,11 @@ export default function Drive (baseUrl) {
                     <Navigation
                         baseUrl={baseUrl}
                         selectedSection={selectedSection}
-                        onSectionChange={setSelectedSection}
+                        onSectionChange={handleSectionChange} // Use the new handler
                         isDownloadActive={isDownloadActive}
                         progress={progress}
                         setRefreshFiles={setRefreshFiles}
+                        onOpenMenu={handleOpenDrawer}
                     />
                 </Layout.SideNav>
                 <Layout.Main>

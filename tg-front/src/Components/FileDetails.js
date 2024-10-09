@@ -10,14 +10,9 @@ import {
     Tab,
     TabPanel,
     AspectRatio,
-    Button,
 } from '@mui/joy';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import DriveFileRenameOutlineRoundedIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
-import FileActionsModal from './FileManager/FileActionsModal'; // Assicurati che il percorso del file sia corretto
+import FileActionsModal from './FileManager/FileActionsModal';
 
 export default function FileDetails({ file, onClose }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,17 +29,6 @@ export default function FileDetails({ file, onClose }) {
         setModalType('');
     };
 
-    const handleRename = () => {
-        // Implementa la logica per rinominare il file
-        console.log('Renaming file to:', newName);
-        handleCloseModal();
-    };
-
-    const handleDelete = () => {
-        // Implementa la logica per eliminare il file
-        console.log('Deleting file:', file.name);
-        handleCloseModal();
-    };
 
     return (
         <>
@@ -99,10 +83,7 @@ export default function FileDetails({ file, onClose }) {
                                 {file.size}
                             </Typography>
 
-                            <Typography level="title-sm">Owner</Typography>
-                            <Typography level="body-sm" textColor="text.primary">
-                                Multiple Users
-                            </Typography>
+
                             <Typography level="title-sm">Modified</Typography>
                             <Typography level="body-sm" textColor="text.primary">
                                 {file.modified}
@@ -113,29 +94,16 @@ export default function FileDetails({ file, onClose }) {
                             </Typography>
                         </Box>
                         <Divider />
-                        <Box sx={{ py: 2, px: 1, display: 'flex', gap: 1, justifyContent: 'center' }}>
-                            <Button variant="plain" size="sm" startDecorator={<DownloadRoundedIcon />}>
-                                Download
-                            </Button>
-                            <Button variant="plain" size="sm" startDecorator={<DriveFileRenameOutlineRoundedIcon />} onClick={() => handleOpenModal('rename')}>
-                                Rename
-                            </Button>
-                            <Button variant="plain" size="sm" startDecorator={<DeleteRoundedIcon />} onClick={() => handleOpenModal('delete')}>
-                                Delete
-                            </Button>
-                        </Box>
+
                     </TabPanel>
-                    {/* La scheda Activity può essere personalizzata in modo simile */}
                 </Tabs>
             </Sheet>
 
-            {/* Modale per le azioni di file */}
             <FileActionsModal
                 open={isModalOpen}
                 modalType={modalType}
                 onClose={handleCloseModal}
-                onRename={handleRename}
-                onDelete={handleDelete}
+
                 selectedFile={file}
                 newName={newName}
                 setNewName={setNewName}

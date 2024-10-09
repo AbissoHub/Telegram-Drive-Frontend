@@ -9,15 +9,25 @@ import ListItemContent from '@mui/joy/ListItemContent';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import UploadButton from "./UploadButton.js";
-import SyncButton from "./SyncButton";
-import CreateFolderButton from "./CreateFolderButton";
+
+import UploadButton from './UploadButton.js';
+import SyncButton from './SyncButton';
+import CreateFolderButton from './CreateFolderButton';
 import { LinearProgress, Typography, Box } from '@mui/joy';
 
-
-export default function Navigation({ baseUrl, selectedSection, onSectionChange = () => {}, isDownloadActive, progress, setRefreshFiles }) {
+export default function Navigation({
+                                     baseUrl,
+                                     selectedSection,
+                                     onSectionChange = () => {},
+                                     isDownloadActive,
+                                     progress,
+                                     setRefreshFiles,
+                                   }) {
   return (
-      <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px', width: '250px' }}>
+      <List
+          size="sm"
+          sx={{ '--ListItem-radius': '8px', '--List-gap': '4px', width: '250px' }}
+      >
         <ListItem nested>
           <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
             Browse
@@ -59,6 +69,7 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
                 <ListItemContent>Trash</ListItemContent>
               </ListItemButton>
             </ListItem>
+
           </List>
         </ListItem>
         <ListItem nested>
@@ -70,7 +81,10 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
               sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
             <ListItem>
-              <CreateFolderButton baseUrl={baseUrl} setRefreshFiles={setRefreshFiles} />
+              <CreateFolderButton
+                  baseUrl={baseUrl}
+                  setRefreshFiles={setRefreshFiles}
+              />
             </ListItem>
             <ListItem>
               <UploadButton baseUrl={baseUrl} setRefreshFiles={setRefreshFiles} />
@@ -92,13 +106,12 @@ export default function Navigation({ baseUrl, selectedSection, onSectionChange =
                 <ListItem>
                   <Box sx={{ width: '100%' }}>
                     <Typography variant="body2" color="text.secondary">
-                      Download in corso: {progress}%
+                      Download in progress: {progress}%
                     </Typography>
                     <LinearProgress variant="determinate" value={progress} />
                   </Box>
                 </ListItem>
             )}
-
           </List>
         </ListItem>
       </List>

@@ -5,8 +5,8 @@ import Box from '@mui/joy/Box';
 import { styled } from '@mui/joy/styles';
 import { Typography, Select, Option, CircularProgress } from "@mui/joy";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { toast } from "sonner"; // Assicurati di avere questa libreria installata
-import { useSession } from './SessionContext'; // Assicurati di avere questo contesto
+import { toast } from "sonner";
+import { useSession } from './SessionContext';
 
 const VisuallyHiddenInput = styled('input')`
   display: none;
@@ -144,14 +144,13 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
 
             const fileSize = selectedFile.size;
 
-            const destination = `${selectedDrive}/${selectedSubfolder}`;
+            const destination = `${selectedSubfolder}`;
 
-            const clusterId = 'IL_TUO_CLUSTER_ID';
 
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('destination', destination);
-            formData.append('c', clusterId);
+            formData.append('c', selectedDrive);
             formData.append('file_size', fileSize.toString());
 
             try {

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useSession } from './SessionContext';
 
 
-const UploadButton = ({baseUrl}) => {
+const SyncButton = ({baseUrl}) => {
     const [countdown, setCountdown] = useState(0);
     const [isDisabled, setIsDisabled] = useState(false);
     const { token } = useSession();
@@ -77,4 +77,4 @@ const UploadButton = ({baseUrl}) => {
     );
 };
 
-export default UploadButton;
+export default SyncButton;

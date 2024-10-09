@@ -35,7 +35,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         setModalType(type);
         setSelectedFile(file);
         setOpenModal(true);
-        setNewName(file.name); // Imposta il nome del file corrente nel modal
+        setNewName(file.name);
 
         if (type === 'move') {
             fetchFolders(file.cluster_id);
@@ -99,70 +99,76 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         }
     };
 
-    const handleRenameFolder = (new_folder_path) => {
-        let options = {
-            method: 'POST',
-            headers: {
-                Authorization: `${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                c: selectedFile.cluster_id,
-                old_path_folder: selectedFile.locate_media,
-                new_name: new_folder_path,
-            }),
-        };
+    const handleRenameFolder = async (new_folder_path) => {
+        try {
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: selectedFile.cluster_id,
+                    old_path_folder: selectedFile.locate_media,
+                    new_name: new_folder_path,
+                }),
+            };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/rename-folder`, options)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during rename:", error);
-                throw error;
-            });
+            toast.loading('Renaming folder...');
 
-        toast.promise(fetchPromise, {
-            loading: 'Renaming folder...',
-            success: (result) => {
-                setRefreshFiles((prev) => !prev);
-                return result.message;
-            },
-            error: (error) => error.message || 'Failed to rename folder.',
-        });
+            const response = await fetch(`${baseUrl["baseUrl"]}/rename-folder`, options);
+            const data = await response.json();
 
-        fetchPromise.finally(handleCloseModal);
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to rename folder.');
+            }
+
+            setRefreshFiles((prev) => !prev);
+            toast.dismiss();
+            toast.success(data.message);
+        } catch (error) {
+            console.error("Error during rename:", error);
+            toast.dismiss();
+            toast.error(error.message || 'Failed to rename folder.');
+        } finally {
+            handleCloseModal();
+        }
     };
 
-    const handleRenameFile = (name_change) => {
-        let options = {
-            method: 'POST',
-            headers: {
-                Authorization: `${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                c: selectedFile.cluster_id,
-                file_id: selectedFile.id_message,
-                new_name: name_change,
-            }),
-        };
+    const handleRenameFile = async (name_change) => {
+        try {
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: selectedFile.cluster_id,
+                    file_id: selectedFile.id_message,
+                    new_name: name_change,
+                }),
+            };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/rename-file`, options)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during rename:", error);
-                throw error;
-            });
+            toast.loading('Renaming file...');
 
-        toast.promise(fetchPromise, {
-            loading: 'Renaming file...',
-            success: (result) => {
-                setRefreshFiles((prev) => !prev);
-                return result.message;
-            },
-            error: (error) => error.message || 'Failed to rename file.',
-        });
+            const response = await fetch(`${baseUrl["baseUrl"]}/rename-file`, options);
+            const data = await response.json();
 
-        fetchPromise.finally(handleCloseModal);
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to rename file.');
+            }
+
+            setRefreshFiles((prev) => !prev);
+            toast.dismiss();
+            toast.success(data.message);
+        } catch (error) {
+            console.error("Error during rename:", error);
+            toast.dismiss();
+            toast.error(error.message || 'Failed to rename file.');
+        } finally {
+            handleCloseModal();
+        }
     };
 
     const handleDelete = () => {
@@ -175,103 +181,113 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         }
     };
 
-    const handleDeleteFolder = () => {
-        let options = {
-            method: 'POST',
-            headers: {
-                Authorization: `${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                c: selectedFile.cluster_id,
-                folder_path: selectedFile.locate_media,
-            }),
-        };
+    const handleDeleteFolder = async () => {
+        try {
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: selectedFile.cluster_id,
+                    folder_path: selectedFile.locate_media,
+                }),
+            };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/delete-folder`, options)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during delete:", error);
-                throw error;
-            });
+            toast.loading('Deleting folder...');
 
-        toast.promise(fetchPromise, {
-            loading: 'Deleting folder...',
-            success: (result) => {
-                setRefreshFiles((prev) => !prev);
-                return result.message;
-            },
-            error: (error) => error.message || 'Failed to delete folder.',
-        });
+            const response = await fetch(`${baseUrl["baseUrl"]}/delete-folder`, options);
+            const data = await response.json();
 
-        fetchPromise.finally(handleCloseModal);
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Error deleting the folder');
+            }
+
+            setRefreshFiles(prev => !prev);
+            toast.dismiss();
+            toast.success(data.message);
+
+        } catch (error) {
+            console.error("Error during delete:", error);
+            toast.dismiss();
+            toast.error(error.message || 'Failed to delete folder.');
+        } finally {
+            handleCloseModal();
+        }
     };
 
-    const handleDeleteFile = () => {
-        let options = {
-            method: 'POST',
-            headers: {
-                Authorization: `${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                c: selectedFile.cluster_id,
-                file_id: selectedFile.id_message,
-            }),
-        };
+    const handleDeleteFile = async () => {
+        try {
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: selectedFile.cluster_id,
+                    file_id: selectedFile.id_message,
+                }),
+            };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/delete-file`, options)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during delete:", error);
-                throw error;
-            });
+            toast.loading('Deleting file...');
 
-        toast.promise(fetchPromise, {
-            loading: 'Deleting file...',
-            success: (result) => {
-                setRefreshFiles((prev) => !prev);
-                return result.message;
-            },
-            error: (error) => error.message,
-        });
+            const response = await fetch(`${baseUrl["baseUrl"]}/delete-file`, options);
+            const data = await response.json();
 
-        fetchPromise.finally(handleCloseModal);
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to delete file.');
+            }
+
+            setRefreshFiles((prev) => !prev);
+            toast.dismiss();
+            toast.success(data.message);
+        } catch (error) {
+            console.error("Error during delete:", error);
+            toast.dismiss();
+            toast.error(error.message || 'Failed to delete file.');
+        } finally {
+            handleCloseModal();
+        }
     };
 
-    const handleMove = () => {
+    const handleMove = async () => {
         if (!selectedFile || !newLocation) return;
 
-        let options = {
-            method: 'POST',
-            headers: {
-                Authorization: `${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                c: selectedFile.cluster_id,
-                file_id: selectedFile.id_message,
-                new_location: newLocation,
-            }),
-        };
+        try {
+            const options = {
+                method: 'POST',
+                headers: {
+                    Authorization: `${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    c: selectedFile.cluster_id,
+                    file_id: selectedFile.id_message,
+                    new_location: newLocation,
+                }),
+            };
 
-        const fetchPromise = fetch(`${baseUrl["baseUrl"]}/move-file`, options)
-            .then((response) => response.json())
-            .catch((error) => {
-                console.error("Error during moving:", error);
-                throw error;
-            });
+            toast.loading('Moving file...');
 
-        toast.promise(fetchPromise, {
-            loading: 'Moving file...',
-            success: (result) => {
-                setRefreshFiles((prev) => !prev);
-                return result.message;
-            },
-            error: (error) => error.message,
-        });
+            const response = await fetch(`${baseUrl["baseUrl"]}/move-file`, options);
+            const data = await response.json();
 
-        fetchPromise.finally(handleCloseModal);
+            if (data.status === 'error') {
+                throw new Error(data.message || 'Failed to move file.');
+            }
+
+            setRefreshFiles((prev) => !prev);
+            toast.dismiss();
+            toast.success(data.message);
+        } catch (error) {
+            console.error("Error during moving:", error);
+            toast.dismiss();
+            toast.error(error.message || 'Failed to move file.');
+        } finally {
+            handleCloseModal();
+        }
     };
 
     const handleDownload = async () => {
@@ -281,7 +297,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
         }
 
         if (!selectedFile) {
-            toast.error('Per favore, seleziona un file da scaricare.');
+            toast.error('Please, select a file to download.');
             return;
         }
 
@@ -307,7 +323,7 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || `Il server ha risposto con status ${response.status}`);
+                throw new Error(errorData.message || `Server responded with status ${response.status}`);
             }
 
             let filename = newName;
@@ -323,9 +339,8 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             const total = contentLength ? parseInt(contentLength, 10) : 0;
 
             if (!response.body) {
-                throw new Error('ReadableStream non supportato in questa risposta.');
+                throw new Error('ReadableStream not supported in this response.');
             }
-
 
             const reader = response.body.getReader();
             const chunks = [];
@@ -345,26 +360,23 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
             const blob = new Blob(chunks);
             const url = window.URL.createObjectURL(blob);
 
-            // Crea un elemento <a> temporaneo
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
             document.body.appendChild(a);
             a.click();
 
-            // Rimuove l'elemento <a> e revoca l'URL oggetto
             a.remove();
             window.URL.revokeObjectURL(url);
 
             setProgress(100);
             setIsDownloadActive(false);
-            toast.success(`File '${filename}' scaricato con successo!`);
+            toast.success(`File '${filename}' downloaded successfully!`);
         } catch (error) {
             setIsDownloadActive(false);
             toast.error(error.message);
         }
     };
-
 
 
 

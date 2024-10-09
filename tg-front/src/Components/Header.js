@@ -12,25 +12,17 @@ import Menu from '@mui/joy/Menu';
 import MenuButton from '@mui/joy/MenuButton';
 import MenuItem from '@mui/joy/MenuItem';
 import ListDivider from '@mui/joy/ListDivider';
-import Drawer from '@mui/joy/Drawer';
-import ModalClose from '@mui/joy/ModalClose';
-import DialogTitle from '@mui/joy/DialogTitle';
 import { useSession } from './SessionContext';
 import { toast } from 'sonner';
 
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
-import BookRoundedIcon from '@mui/icons-material/BookRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-
-
-import Navigation from './Navigation.js';
 
 function ColorSchemeToggle() {
     const { mode, setMode } = useColorScheme();
@@ -59,9 +51,8 @@ function ColorSchemeToggle() {
     );
 }
 
-export default function Header({baseUrl}) {
-    const { logout, lastLogin, role, urlAvatar, email } = useSession();
-    const [open, setOpen] = React.useState(false);
+export default function Header({ baseUrl, onOpenDrawer }) { // Added onOpenDrawer prop
+    const { logout, role, urlAvatar, email } = useSession();
 
     const handleLogout = () => {
         logout();
@@ -88,7 +79,6 @@ export default function Header({baseUrl}) {
         });
     };
 
-
     return (
         <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
             <Stack
@@ -108,7 +98,6 @@ export default function Header({baseUrl}) {
                     onClick={handleLanguageClick}
                 >
                     <LanguageRoundedIcon />
-
                 </IconButton>
             </Stack>
 
@@ -137,21 +126,19 @@ export default function Header({baseUrl}) {
                 />
             </Box>
 
-            <Box sx={{ display: { xs: 'inline-flex', sm: 'none' }, flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                <IconButton variant="plain" color="neutral" onClick={() => setOpen(true)}>
+            {/* Mobile View */}
+            <Box
+                sx={{
+                    display: { xs: 'inline-flex', sm: 'none' },
+                    flexGrow: 1,
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
+                <IconButton variant="plain" color="neutral" onClick={onOpenDrawer}> {/* Use onOpenDrawer */}
                     <MenuRoundedIcon />
                 </IconButton>
-                <Drawer
-                    sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
-                    open={open}
-                    onClose={() => setOpen(false)}
-                >
-                    <ModalClose />
-                    <DialogTitle>AbissoHub Drive</DialogTitle>
-                    <Box sx={{ px: 1 }}>
-                        <Navigation />
-                    </Box>
-                </Drawer>
+                {/* Removed local Drawer component */}
                 <IconButton
                     size="sm"
                     variant="outlined"
@@ -171,8 +158,8 @@ export default function Header({baseUrl}) {
                         sx={{ maxWidth: '32px', maxHeight: '32px', borderRadius: '9999999px' }}
                     >
                         <Avatar
-                            src="https://i.pravatar.cc/40?img=2"
-                            srcSet="https://i.pravatar.cc/80?img=2"
+                            src={urlAvatar}
+                            srcSet={urlAvatar}
                             sx={{ maxWidth: '32px', maxHeight: '32px' }}
                         />
                     </MenuButton>
@@ -204,10 +191,7 @@ export default function Header({baseUrl}) {
                             </Box>
                         </MenuItem>
                         <ListDivider />
-                        <MenuItem>
-                            <HelpRoundedIcon />
-                            Help
-                        </MenuItem>
+
                         <MenuItem>
                             <SettingsRoundedIcon />
                             Settings
@@ -215,13 +199,13 @@ export default function Header({baseUrl}) {
                         <ListDivider />
                         <MenuItem
                             component="a"
-                            href="https://github.com/mui/material-ui/tree/master/docs/data/joy/getting-started/templates/email"
+                            href="https://github.com/AbissoHub/Telegram-Drive"
                         >
                             Sourcecode
                             <OpenInNewRoundedIcon />
                         </MenuItem>
                         <ListDivider />
-                        <MenuItem onClick={handleLogout}> {/* Usa handleLogout per il logout e il toast */}
+                        <MenuItem onClick={handleLogout}>
                             <LogoutRoundedIcon />
                             Log out
                         </MenuItem>
