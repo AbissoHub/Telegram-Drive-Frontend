@@ -17,7 +17,7 @@ const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
     const [availableSubfolders, setAvailableSubfolders] = useState([]);
     const [loadingDrives, setLoadingDrives] = useState(false);
     const [loadingSubfolders, setLoadingSubfolders] = useState(false);
-    const { token } = useSession();
+    const { token, clusterIdPrivate, clusterIdPublic } = useSession();
 
     const handleOpen = () => {
         setOpen(true);
@@ -62,42 +62,27 @@ const CreateFolderButton = ({ baseUrl, setRefreshFiles }) => {
     };
 
 
-    const fetchClustersInfo = async () => {
+    const fetchClustersInfo = () => {
         setLoadingDrives(true);
         try {
-            const response = await fetch(`${baseUrl["baseUrl"]}/get-clusters-info`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            const data = await response.json();
+            const formattedClusters = [];
 
-            if (data.status === 'success') {
-                const privateKey = Object.keys(data.data).find(key => key.includes('Private'));
-                const sharedKey = Object.keys(data.data).find(key => key.includes('Shared'));
+            if (clusterIdPrivate) {
+                formattedClusters.push({ name: 'My Files', value: clusterIdPrivate });
+            }
 
-                const privateKeyValue = privateKey ? data.data[privateKey] : null;
-                const sharedKeyValue = sharedKey ? data.data[sharedKey] : null;
+            if (clusterIdPublic) {
+                formattedClusters.push({name: 'Shared Files', value: clusterIdPublic});
+            }
 
-                const formattedDrives = [];
-
-                if (privateKeyValue) {
-                    formattedDrives.push({ name: 'My Files', value: privateKeyValue });
-                }
-
-                if (sharedKeyValue) {
-                    formattedDrives.push({ name: 'Shared Files', value: sharedKeyValue });
-                }
-
-                setAvailableDrives(formattedDrives);
+            if (formattedClusters.length > 0) {
+                setAvailableDrives(formattedClusters);
             } else {
-                throw new Error(data.message || 'Failed to fetch drives');
+                throw new Error('No cluster information available');
             }
         } catch (error) {
-            toast.error(error.message || 'Failed to fetch drives');
+            toast.error(error.message || 'Failed to set cluster information');
         } finally {
             setLoadingDrives(false);
         }

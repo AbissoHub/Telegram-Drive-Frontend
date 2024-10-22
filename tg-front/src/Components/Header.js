@@ -51,7 +51,7 @@ function ColorSchemeToggle() {
     );
 }
 
-export default function Header({ baseUrl, onOpenDrawer }) { // Added onOpenDrawer prop
+export default function Header({ baseUrl, onOpenDrawer }) {
     const { logout, role, urlAvatar, email } = useSession();
 
     const handleLogout = () => {
@@ -135,10 +135,10 @@ export default function Header({ baseUrl, onOpenDrawer }) { // Added onOpenDrawe
                     alignItems: 'center',
                 }}
             >
-                <IconButton variant="plain" color="neutral" onClick={onOpenDrawer}> {/* Use onOpenDrawer */}
+                <IconButton variant="plain" color="neutral" onClick={onOpenDrawer}>
                     <MenuRoundedIcon />
                 </IconButton>
-                {/* Removed local Drawer component */}
+
                 <IconButton
                     size="sm"
                     variant="outlined"

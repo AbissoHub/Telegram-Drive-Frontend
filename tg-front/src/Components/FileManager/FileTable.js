@@ -394,10 +394,10 @@ export default function FileTable({ files, onFileClick, onFolderClick, baseUrl, 
                         </Typography>
                     </StyledTh>
                     <StyledTh sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                        <Typography level="title-sm">Dimensione</Typography>
+                        <Typography level="title-sm">Dimension</Typography>
                     </StyledTh>
                     <StyledTh>
-                        <Typography level="title-sm">Azioni</Typography>
+                        <Typography level="title-sm">Actions</Typography>
                     </StyledTh>
                 </tr>
                 </thead>

@@ -78,7 +78,7 @@ export default function Drive(baseUrl) {
                     <Navigation
                         baseUrl={baseUrl}
                         selectedSection={selectedSection}
-                        onSectionChange={handleSectionChange} // Use the new handler
+                        onSectionChange={handleSectionChange}
                         isDownloadActive={isDownloadActive}
                         progress={progress}
                         setRefreshFiles={setRefreshFiles}

@@ -3,7 +3,7 @@ import Button from '@mui/joy/Button';
 import Modal from '@mui/joy/Modal';
 import Box from '@mui/joy/Box';
 import { styled } from '@mui/joy/styles';
-import { Typography, Select, Option, CircularProgress } from "@mui/joy";
+import { Typography, Select, Option, CircularProgress, LinearProgress } from "@mui/joy";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
 import { useSession } from './SessionContext';
@@ -21,18 +21,21 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
     const [availableSubfolders, setAvailableSubfolders] = useState([]);
     const [loadingDrives, setLoadingDrives] = useState(false);
     const [loadingSubfolders, setLoadingSubfolders] = useState(false);
-    const { token } = useSession();
+    const [isUploading, setIsUploading] = useState(false);
+    const { token, clusterIdPrivate, clusterIdPublic } = useSession();
 
     const handleOpen = () => {
         setOpen(true);
     };
     const handleClose = () => {
-        setOpen(false);
-        setSelectedFile(null);
-        setSelectedDrive('');
-        setSelectedSubfolder('');
-        setAvailableDrives([]);
-        setAvailableSubfolders([]);
+        if (!isUploading) {
+            setOpen(false);
+            setSelectedFile(null);
+            setSelectedDrive('');
+            setSelectedSubfolder('');
+            setAvailableDrives([]);
+            setAvailableSubfolders([]);
+        }
     };
 
     const handleFileSelect = (event) => {
@@ -62,42 +65,26 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
         }
     };
 
-    const fetchDrives = async () => {
+    const fetchDrives = () => {
         setLoadingDrives(true);
         try {
-            const response = await fetch(`${baseUrl["baseUrl"]}/get-clusters-info`, {
-                method: 'GET',
-                headers: {
-                    Authorization: `${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+            const formattedDrives = [];
 
-            const data = await response.json();
+            if (clusterIdPrivate) {
+                formattedDrives.push({ name: 'My Files', value: clusterIdPrivate });
+            }
 
-            if (data.status === 'success') {
-                const privateKey = Object.keys(data.data).find(key => key.includes('Private'));
-                const sharedKey = Object.keys(data.data).find(key => key.includes('Shared'));
+            if (clusterIdPublic) {
+                formattedDrives.push({ name: 'Shared Files', value: clusterIdPublic });
+            }
 
-                const privateKeyValue = privateKey ? data.data[privateKey] : null;
-                const sharedKeyValue = sharedKey ? data.data[sharedKey] : null;
-
-                const formattedDrives = [];
-
-                if (privateKeyValue) {
-                    formattedDrives.push({ name: 'My Files', value: privateKeyValue });
-                }
-
-                if (sharedKeyValue) {
-                    formattedDrives.push({ name: 'Shared Files', value: sharedKeyValue });
-                }
-
+            if (formattedDrives.length > 0) {
                 setAvailableDrives(formattedDrives);
             } else {
-                throw new Error(data.message || 'Failed to fetch drives');
+                throw new Error('No drives available');
             }
         } catch (error) {
-            toast.error(error.message || 'Failed to fetch drives');
+            toast.error(error.message || 'Failed to set drives');
         } finally {
             setLoadingDrives(false);
         }
@@ -146,12 +133,13 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
 
             const destination = `${selectedSubfolder}`;
 
-
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('destination', destination);
             formData.append('c', selectedDrive);
             formData.append('file_size', fileSize.toString());
+
+            setIsUploading(true);
 
             try {
                 const response = await fetch(`${baseUrl["baseUrl"]}/upload`, {
@@ -165,22 +153,23 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    toast.success('File caricato con successo!');
+                    toast.success('File uploaded successfully!');
                     handleClose();
                     if (setRefreshFiles) {
                         setRefreshFiles(prev => !prev);
                     }
                 } else {
-                    throw new Error(data.message || 'Upload fallito');
+                    throw new Error(data.message || 'Upload failed');
                 }
             } catch (error) {
-                toast.error(error.message || 'Upload fallito');
+                toast.error(error.message || 'Upload failed');
+            } finally {
+                setIsUploading(false);
             }
         } else {
-            toast.error('Per favore, seleziona un file, un drive e una destinazione.');
+            toast.error('Please select a file, a drive, and a destination.');
         }
     };
-
 
     return (
         <>
@@ -198,9 +187,8 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                         backgroundColor: '#0056b3',
                     },
                 }}
-                startDecorator={
-                    <CloudUploadIcon/>
-                }
+                startDecorator={<CloudUploadIcon />}
+                disabled={isUploading}
             >
                 Upload File
             </Button>
@@ -211,14 +199,20 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                         mx: 'auto',
                         p: 3,
                         mt: '10%',
-                        backgroundColor: 'white',
+                        backgroundColor: '#FFFFFF',
                         borderRadius: '8px',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                     }}
                 >
                     <Typography level="h5" sx={{ mb: 2 }}>
-                        Carica un File
+                        Upload a File
                     </Typography>
+
+                    {isUploading && (
+                        <Box sx={{ width: '100%', mb: 2 }}>
+                            <LinearProgress color="primary" />
+                        </Box>
+                    )}
 
                     {!selectedFile && (
                         <Button
@@ -226,26 +220,27 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                             variant="outlined"
                             color="primary"
                             sx={{ mb: 2 }}
+                            disabled={isUploading}
                         >
-                            Scegli File da Caricare
+                            Choose File to Upload
                             <VisuallyHiddenInput type="file" onChange={handleFileSelect} />
                         </Button>
                     )}
 
                     {selectedFile && (
                         <Typography level="body1" sx={{ mb: 2 }}>
-                            File selezionato: {selectedFile.name}
+                            Selected file: {selectedFile.name}
                         </Typography>
                     )}
 
                     {selectedFile && (
                         <>
                             <Select
-                                placeholder={loadingDrives ? 'Caricamento drive...' : 'Seleziona Drive'}
-                                onChange={handleDriveChange}
+                                placeholder={loadingDrives ? 'Loading drives...' : 'Select Drive'}
+                                onChange={(event, value) => handleDriveChange(event, value)}
                                 sx={{ mb: 2 }}
                                 value={selectedDrive}
-                                disabled={loadingDrives || availableDrives.length === 0}
+                                disabled={loadingDrives || availableDrives.length === 0 || isUploading}
                                 startDecorator={loadingDrives && <CircularProgress size="sm" />}
                             >
                                 {availableDrives.map((drive) => (
@@ -256,11 +251,11 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                             </Select>
 
                             <Select
-                                placeholder={loadingSubfolders ? 'Caricamento sottocartelle...' : 'Seleziona Sottocartella'}
-                                onChange={handleSubfolderChange}
+                                placeholder={loadingSubfolders ? 'Loading subfolders...' : 'Select Subfolder'}
+                                onChange={(event, value) => handleSubfolderChange(event, value)}
                                 sx={{ mb: 2 }}
                                 value={selectedSubfolder}
-                                disabled={!selectedDrive || loadingSubfolders || availableSubfolders.length === 0}
+                                disabled={!selectedDrive || loadingSubfolders || availableSubfolders.length === 0 || isUploading}
                                 startDecorator={loadingSubfolders && <CircularProgress size="sm" />}
                             >
                                 {availableSubfolders.map((subfolder, index) => (
@@ -273,22 +268,29 @@ const UploadButton = ({ baseUrl, setRefreshFiles }) => {
                     )}
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                        <Button onClick={handleClose} variant="outlined" color="danger">
-                            Annulla
+                        <Button
+                            onClick={handleClose}
+                            variant="outlined"
+                            color="danger"
+                            disabled={isUploading}
+                        >
+                            Cancel
                         </Button>
                         <Button
                             onClick={uploadFile}
                             variant="solid"
                             color="success"
-                            disabled={!selectedFile || !selectedDrive || !selectedSubfolder}
+                            disabled={!selectedFile || !selectedDrive || !selectedSubfolder || isUploading}
+                            startDecorator={isUploading && <CircularProgress size="sm" />}
                         >
-                            Upload
+                            {isUploading ? 'Uploading...' : 'Upload'}
                         </Button>
                     </Box>
                 </Box>
             </Modal>
         </>
     );
+
 };
 
 export default UploadButton;
